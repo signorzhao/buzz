@@ -1,0 +1,7 @@
+{
+  "name": "BuzzSync",
+  "description": "An iOS-styled group notification app. Create groups, invite friends, and send instant alerts or AI-powered smart messages to everyone in the group.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
