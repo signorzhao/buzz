@@ -75,7 +75,7 @@ const App: React.FC = () => {
   };
 
   const handleDeleteContact = (id: string) => {
-    if (confirm('Remove this person?')) {
+    if (confirm('确定要删除这个联系人吗？')) {
       const updated = deleteContact(id);
       setContacts(updated);
       setSelectedIds(prev => {
@@ -112,7 +112,7 @@ const App: React.FC = () => {
     const targets = contacts.filter(c => selectedIds.has(c.id));
 
     if (targets.length === 0) {
-      alert("Select at least one person!");
+      alert("请至少选择一个人！");
       return;
     }
 
@@ -120,7 +120,7 @@ const App: React.FC = () => {
 
     // Get my name for context
     const myProfile = getMyProfile();
-    const senderName = myProfile.name || 'Friend';
+    const senderName = myProfile.name || '好友';
     
     // Encode Message
     const encodedMsg = encodeURIComponent(msgContent);
@@ -170,7 +170,7 @@ const App: React.FC = () => {
                onClick={() => setIsEditMode(!isEditMode)}
                className={`text-sm font-medium ${isEditMode ? 'text-red-500' : 'text-gray-500'}`}
              >
-               {isEditMode ? 'Done' : 'Edit'}
+               {isEditMode ? '完成' : '编辑'}
              </button>
              <button onClick={() => setShowSettings(true)}>
                <Settings className="w-6 h-6 text-gray-500" />
@@ -182,10 +182,10 @@ const App: React.FC = () => {
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
           <div className="flex justify-between items-center mb-4">
              <h2 className="text-gray-500 text-sm font-medium uppercase tracking-wider">
-               Receivers ({selectedIds.size})
+               接收列表 ({selectedIds.size})
              </h2>
              <button onClick={handleSelectAll} className="text-blue-600 text-sm font-medium">
-               {selectedIds.size === contacts.length ? 'None' : 'All'}
+               {selectedIds.size === contacts.length ? '取消' : '全选'}
              </button>
           </div>
           
@@ -196,7 +196,7 @@ const App: React.FC = () => {
               className="aspect-square rounded-2xl bg-gray-200 flex flex-col items-center justify-center gap-1 active:scale-95 transition-all text-gray-500"
             >
               <Plus className="w-8 h-8" />
-              <span className="text-[10px] font-medium">Add</span>
+              <span className="text-[10px] font-medium">添加</span>
             </button>
 
             {/* List */}
@@ -242,7 +242,7 @@ const App: React.FC = () => {
           {contacts.length === 0 && (
              <div className="text-center mt-10 text-gray-400">
                 <UserPlus className="w-12 h-12 mx-auto mb-2 opacity-20" />
-                <p className="text-sm">No contacts yet.<br/>Add your friends' Bark keys.</p>
+                <p className="text-sm">暂无联系人<br/>请添加好友的 Bark Key</p>
              </div>
           )}
         </div>
@@ -275,17 +275,17 @@ const App: React.FC = () => {
           {/* Fallback Main Buzz Button */}
           <Button 
             fullWidth 
-            onClick={() => broadcast("BUZZ! ⚡️")}
+            onClick={() => broadcast("紧急呼叫! ⚡️")}
             disabled={isSending || selectedIds.size === 0}
             className={`h-12 text-lg shadow-blue-300 shadow-lg ${isSending ? 'opacity-80' : ''}`}
           >
             {isSending ? (
-              <span className="animate-pulse">Sending...</span>
+              <span className="animate-pulse">发送中...</span>
             ) : lastSentMessage ? (
-              <span className="text-sm truncate">Sent: "{lastSentMessage}"</span>
+              <span className="text-sm truncate">已发送: "{lastSentMessage}"</span>
             ) : (
               <div className="flex items-center gap-2">
-                <span>Buzz Only</span>
+                <span>一键提醒</span>
                 <Zap className="w-5 h-5 fill-white" />
               </div>
             )}
@@ -306,7 +306,7 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-6 animate-slideUp mb-[env(safe-area-inset-bottom)]">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">Add Contact</h3>
+              <h3 className="text-lg font-bold">添加联系人</h3>
               <button onClick={() => setShowAddModal(false)} className="text-gray-400">
                 <X className="w-6 h-6" />
               </button>
@@ -314,24 +314,24 @@ const App: React.FC = () => {
             
             <div className="space-y-4">
               <Input 
-                placeholder="Name (e.g. Jack)" 
+                placeholder="昵称 (例如: 老张)" 
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 autoFocus
               />
               <div>
                 <Input 
-                  placeholder="Bark Key or URL" 
+                  placeholder="Bark Key 或 链接" 
                   value={newKey}
                   onChange={(e) => setNewKey(e.target.value)}
                   className="font-mono text-sm"
                 />
                 <p className="text-[10px] text-gray-400 mt-1 ml-1">
-                  Paste the full link from their Bark app
+                  请粘贴 Bark App 中的完整链接
                 </p>
               </div>
               <Button fullWidth onClick={handleAddContact} disabled={!newName || !newKey}>
-                Save Contact
+                保存
               </Button>
             </div>
           </div>

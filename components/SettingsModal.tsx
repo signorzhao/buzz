@@ -55,7 +55,7 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold">My Card</h3>
+          <h3 className="text-xl font-bold">我的名片</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X className="w-6 h-6" />
           </button>
@@ -67,38 +67,38 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
                <img src={qrSrc} alt="My Key QR" className="w-32 h-32 mx-auto mix-blend-multiply mb-2" />
              ) : (
                <div className="w-32 h-32 bg-gray-200 rounded-lg mx-auto mb-2 flex items-center justify-center text-gray-400 text-xs">
-                 No Key
+                 暂无 Key
                </div>
              )}
              <p className="text-xs text-blue-800 font-medium">
-               Show this to friends so they can add you.
+               出示二维码给朋友添加
              </p>
           </div>
 
           <Input
-            label="My Name"
-            placeholder="Your Name"
+            label="我的昵称"
+            placeholder="输入你的名字"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
           
           <div>
             <Input
-              label="My Bark Key / URL"
-              placeholder="Paste from Bark App..."
+              label="我的 Bark Key / 链接"
+              placeholder="从 Bark App 粘贴..."
               value={barkKey}
               onChange={(e) => setBarkKey(e.target.value)}
               className="font-mono text-sm"
             />
             <p className="text-[10px] text-gray-400 mt-1 ml-1">
-              Required if you want people to add you easily later (future feature).
+              方便朋友扫描或复制添加你
             </p>
           </div>
         </div>
 
         <div className="mt-8 flex gap-3">
            <Button fullWidth onClick={handleSave}>
-             Save & Close
+             保存并关闭
            </Button>
         </div>
       </div>
