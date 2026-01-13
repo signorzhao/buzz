@@ -124,7 +124,8 @@ const App: React.FC = () => {
     
     // Encode Message
     const encodedMsg = encodeURIComponent(msgContent);
-    const encodedTitle = encodeURIComponent(`${senderName} via BuzzSync`);
+    // Remove "via BuzzSync" suffix, only encode senderName
+    const encodedTitle = encodeURIComponent(senderName);
     const icon = encodeURIComponent('https://api.iconify.design/lucide:zap.svg?color=%23ef4444');
 
     // Fire requests in parallel
