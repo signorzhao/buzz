@@ -1,7 +1,24 @@
+export interface Contact {
+  id: string;
+  name: string;
+  barkKey: string; // The key part of https://api.day.app/KEY/
+  avatarColor: string;
+}
+
+export enum AppView {
+  HOME = 'HOME',
+  SETTINGS = 'SETTINGS',
+}
+
+export interface NotificationState {
+  message: string;
+  type: 'success' | 'error';
+}
+
 export interface User {
   id: string;
   name: string;
-  avatarColor: string;
+  avatarColor?: string;
   barkUrl?: string;
 }
 
@@ -11,7 +28,7 @@ export interface Notification {
   senderId: string;
   message: string;
   timestamp: number;
-  type: 'buzz' | 'message' | 'system';
+  type: 'buzz' | 'message';
 }
 
 export interface Group {
@@ -20,15 +37,4 @@ export interface Group {
   code: string;
   members: User[];
   history: Notification[];
-}
-
-export enum AppView {
-  ONBOARDING = 'ONBOARDING',
-  HOME = 'HOME',
-  GROUP = 'GROUP',
-}
-
-export enum NotificationPriority {
-  NORMAL = 'NORMAL',
-  URGENT = 'URGENT',
 }

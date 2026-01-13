@@ -7,16 +7,15 @@ export const COLORS = [
   'bg-yellow-500',
   'bg-orange-500',
   'bg-red-500',
+  'bg-teal-500',
+  'bg-cyan-500',
 ];
 
-export const MOCK_DELAY = 600; // ms to simulate network
+// Bark API Base
+export const BARK_SERVER = 'https://api.day.app';
 
-export const SYSTEM_USER_ID = 'system';
-
-// Database Table Configuration
-// Modify these prefixes if they conflict with your existing Supabase tables
 export const TABLES = {
-  GROUPS: 'buzz_groups',
-  MEMBERS: 'buzz_members',
-  NOTIFICATIONS: 'buzz_notifications'
+  MEMBERS: 'members',
+  GROUPS: 'groups',
+  NOTIFICATIONS: 'notifications',
 };

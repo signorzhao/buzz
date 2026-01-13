@@ -1,615 +1,335 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { User, Group, AppView, Notification } from './types';
-import { COLORS } from './constants';
-import { createGroup, joinGroup, sendNotification, simulateIncomingNotification, getGroup } from './services/mockBackend';
-import { initSupabase, sbCreateGroup, sbJoinGroup, sbSendNotification, sbSubscribeToGroup, isSupabaseConfigured, sbGetGroupMembers } from './services/supabaseService';
+import React, { useState, useEffect } from 'react';
+import { Contact } from './types';
+import { BARK_SERVER } from './constants';
+import { getContacts, saveContact, deleteContact, getMyProfile } from './services/storageService';
 import { generateSmartMessage } from './services/geminiService';
 import { Button } from './components/Button';
 import { Input } from './components/Input';
-import { NotificationToast } from './components/NotificationToast';
 import { SettingsModal } from './components/SettingsModal';
 import { 
-  Users, 
   Plus, 
-  LogOut, 
   Zap, 
   Sparkles, 
-  Share2, 
-  ChevronLeft,
-  X,
   Settings,
-  Wifi,
-  WifiOff
+  Trash2,
+  CheckCircle2,
+  Circle,
+  UserPlus,
+  X
 } from 'lucide-react';
 
 const App: React.FC = () => {
-  // State
-  const [view, setView] = useState<AppView>(AppView.ONBOARDING);
-  const [user, setUser] = useState<User | null>(null);
-  const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
-  const [groupsList, setGroupsList] = useState<Group[]>([]);
-  
-  // App Mode State
-  const [isOnlineMode, setIsOnlineMode] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [userBarkUrl, setUserBarkUrl] = useState('');
+  // Data State
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   
   // UI State
-  const [usernameInput, setUsernameInput] = useState('');
-  const [joinCodeInput, setJoinCodeInput] = useState('');
-  const [groupNameInput, setGroupNameInput] = useState('');
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [showAiModal, setShowAiModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   
-  // Notifications
-  const [activeNotification, setActiveNotification] = useState<Notification | null>(null);
+  // Input State
+  const [message, setMessage] = useState('');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
 
-  // Audio Context (Mock Sound)
-  const audioContextRef = useRef<AudioContext | null>(null);
+  // New Contact Inputs
+  const [newName, setNewName] = useState('');
+  const [newKey, setNewKey] = useState('');
 
-  // Initialize
+  // Initial Load
   useEffect(() => {
-    // 0. Check for URL Params (Auto-Sync Credentials for Mobile)
-    const params = new URLSearchParams(window.location.search);
-    const urlParam = params.get('sbUrl');
-    const keyParam = params.get('sbKey');
-    
-    if (urlParam && keyParam) {
-      localStorage.setItem('sb_url', urlParam);
-      localStorage.setItem('sb_key', keyParam);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    // 1. Check User & Bark
-    const storedUser = localStorage.getItem('buzzsync_user');
-    const storedBark = localStorage.getItem('bark_url') || '';
-    setUserBarkUrl(storedBark);
-
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      // Ensure barkUrl is synced to user object
-      setUser({ ...parsedUser, barkUrl: storedBark });
-      setView(AppView.HOME);
-    }
-
-    // 2. Check Supabase Config
-    const sbUrl = localStorage.getItem('sb_url');
-    const sbKey = localStorage.getItem('sb_key');
-    if (sbUrl && sbKey) {
-      const success = initSupabase(sbUrl, sbKey);
-      setIsOnlineMode(success);
-    }
+    const loaded = getContacts();
+    setContacts(loaded);
+    // Default Select All
+    setSelectedIds(new Set(loaded.map(c => c.id)));
   }, []);
 
-  // --- Realtime / Mock Logic ---
+  // --- Actions ---
+
+  const handleAddContact = () => {
+    if (!newName || !newKey) return;
+    const newContact = saveContact(newName, newKey);
+    setContacts(prev => [...prev, newContact]);
+    // Auto select new contact
+    setSelectedIds(prev => new Set(prev).add(newContact.id));
+    
+    // Reset & Close
+    setNewName('');
+    setNewKey('');
+    setShowAddModal(false);
+  };
+
+  const handleDeleteContact = (id: string) => {
+    if (confirm('Remove this person?')) {
+      const updated = deleteContact(id);
+      setContacts(updated);
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
+  };
+
+  const toggleSelection = (id: string) => {
+    if (isEditMode) return; // Don't toggle selection in edit mode
+    
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.size === contacts.length) {
+      setSelectedIds(new Set()); // Deselect all
+    } else {
+      setSelectedIds(new Set(contacts.map(c => c.id))); // Select all
+    }
+  };
+
+  const broadcast = async (msgOverride?: string) => {
+    const finalMessage = msgOverride || message || "BUZZ! ⚡️";
+    const targets = contacts.filter(c => selectedIds.has(c.id));
+
+    if (targets.length === 0) {
+      alert("Select at least one person!");
+      return;
+    }
+
+    setIsSending(true);
+
+    // Get my name for context
+    const myProfile = getMyProfile();
+    const senderName = myProfile.name || 'Friend';
+    
+    // Encode Message
+    const encodedMsg = encodeURIComponent(finalMessage);
+    const encodedTitle = encodeURIComponent(`${senderName} via BuzzSync`);
+    const icon = encodeURIComponent('https://api.iconify.design/lucide:zap.svg?color=%23ef4444');
+
+    // Fire requests in parallel
+    const promises = targets.map(target => {
+      // Bark Format: https://api.day.app/{key}/{title}/{body}?icon=...
+      const url = `${BARK_SERVER}/${target.barkKey}/${encodedTitle}/${encodedMsg}?icon=${icon}&group=BuzzSync`;
+      return fetch(url, { mode: 'no-cors' }) // no-cors is fine for Bark (fire & forget)
+        .catch(e => console.error(`Failed to send to ${target.name}`, e));
+    });
+
+    await Promise.all(promises);
+
+    setIsSending(false);
+    setMessage(''); // Clear message after send
+    if (navigator.vibrate) navigator.vibrate([50, 50, 200]);
+    alert(`Sent to ${targets.length} people!`);
+  };
+
+  const handleAiGenerate = async () => {
+    if (!aiPrompt) return;
+    setIsAiGenerating(true);
+    const myProfile = getMyProfile();
+    const generated = await generateSmartMessage(aiPrompt, myProfile.name || 'Sender');
+    setMessage(generated);
+    setAiPrompt('');
+    setIsAiGenerating(false);
+  };
 
   useEffect(() => {
-    if (!currentGroup) return;
-
-    if (isOnlineMode) {
-      // --- ONLINE MODE: Supabase Subscription ---
-      const unsubscribe = sbSubscribeToGroup(currentGroup.id, (notif) => {
-        if (notif.senderId !== user?.id) {
-           triggerNotification(notif);
-        }
-        
-        // Update History
-        setCurrentGroup(prev => {
-          if (!prev) return null;
-          if (prev.history.find(h => h.id === notif.id)) return prev;
-          return { ...prev, history: [notif, ...prev.history] };
-        });
-      });
-      return () => unsubscribe();
-
-    } else {
-      // --- OFFLINE MODE: Mock Simulation ---
-      const interval = setInterval(() => {
-        simulateIncomingNotification(currentGroup.id, false, (notif) => {
-          const updatedGroup = getGroup(currentGroup.id);
-          if (updatedGroup) setCurrentGroup({ ...updatedGroup });
-          triggerNotification(notif);
-        });
-      }, 5000);
-      return () => clearInterval(interval);
+    if (aiPrompt && !isAiGenerating) {
+      handleAiGenerate();
     }
-  }, [currentGroup, isOnlineMode, user?.id]);
+  }, [aiPrompt]);
 
-  // Actions
-  const playPingSound = () => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    const ctx = audioContextRef.current;
-    if (ctx.state === 'suspended') ctx.resume();
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(440, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
-    
-    gain.gain.setValueAtTime(0.5, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-    
-    osc.start();
-    osc.stop(ctx.currentTime + 0.3);
-  };
-
-  const triggerNotification = (notif: Notification) => {
-    setActiveNotification(notif);
-    playPingSound();
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-  };
-
-  const handleSaveSettings = (url: string, key: string, bark: string) => {
-    const success = initSupabase(url, key);
-    setIsOnlineMode(success);
-    setUserBarkUrl(bark);
-    if(user) {
-        // Update current user state with new bark url
-        const updatedUser = { ...user, barkUrl: bark };
-        setUser(updatedUser);
-        localStorage.setItem('buzzsync_user', JSON.stringify(updatedUser));
-    }
-    
-    if (!success) {
-      alert("Switched to Offline Demo Mode");
-    } else {
-      alert("Connected to Supabase!");
-    }
-  };
-
-  const handleLogin = () => {
-    if (!usernameInput.trim()) return;
-    const newUser: User = {
-      id: crypto.randomUUID(),
-      name: usernameInput.trim(),
-      avatarColor: COLORS[Math.floor(Math.random() * COLORS.length)],
-      barkUrl: userBarkUrl
-    };
-    setUser(newUser);
-    localStorage.setItem('buzzsync_user', JSON.stringify(newUser));
-    setView(AppView.HOME);
-  };
-
-  const handleCreateGroup = async () => {
-    if (!user || !groupNameInput.trim()) return;
-    
-    let group: Group | null = null;
-    setIsLoading(true);
-
-    try {
-      if (isOnlineMode) {
-        group = await sbCreateGroup(groupNameInput.trim(), user);
-      } else {
-        group = createGroup(groupNameInput.trim(), user);
-      }
-
-      if (group) {
-        setGroupsList([...groupsList, group]);
-        setCurrentGroup(group);
-        setView(AppView.GROUP);
-        setGroupNameInput('');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleJoinGroup = async () => {
-    if (!user || !joinCodeInput.trim()) return;
-
-    let group: Group | null = null;
-    setIsLoading(true);
-
-    try {
-      if (isOnlineMode) {
-        group = await sbJoinGroup(joinCodeInput.trim(), user);
-      } else {
-        group = joinGroup(joinCodeInput.trim(), user);
-      }
-
-      if (group) {
-        setGroupsList((prev) => {
-          if (prev.find(g => g.id === group!.id)) return prev;
-          return [...prev, group!];
-        });
-        setCurrentGroup(group);
-        setView(AppView.GROUP);
-        setJoinCodeInput('');
-      } else {
-        alert("Invalid Code or Group not found");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const broadcastViaBark = async (groupId: string, message: string) => {
-    if (!isOnlineMode) return;
-    try {
-      // 1. Get all members of this group from Supabase
-      const members = await sbGetGroupMembers(groupId);
-      
-      // 2. Filter out self and members without barkUrl
-      const targets = members.filter(m => m.id !== user?.id && m.barkUrl);
-
-      console.log(`Broadcasting via Bark to ${targets.length} users...`);
-
-      // 3. Fire requests
-      targets.forEach(member => {
-         if (member.barkUrl) {
-            let cleanUrl = member.barkUrl.endsWith('/') ? member.barkUrl.slice(0, -1) : member.barkUrl;
-            const title = encodeURIComponent(`Buzz from ${user?.name || 'Group'}`);
-            const body = encodeURIComponent(message);
-            // Fire and forget, no await to speed up
-            fetch(`${cleanUrl}/${title}/${body}?group=buzzsync&icon=https://api.iconify.design/lucide:zap.svg?color=%232563eb`)
-              .catch(e => console.error("Bark failed for user", member.name));
-         }
-      });
-    } catch (e) {
-      console.error("Broadcast failed", e);
-    }
-  };
-
-  const handleBuzz = async (messageOverride?: string) => {
-    if (!user || !currentGroup) return;
-
-    const message = messageOverride || "Buzzed you! 🔔";
-    
-    if (isOnlineMode) {
-      // 1. Update In-App History
-      await sbSendNotification(currentGroup.id, user, message);
-      
-      // 2. Broadcast Native Push via Bark
-      broadcastViaBark(currentGroup.id, message);
-    } else {
-      // Offline Simulation
-      const notif: Notification = {
-        id: crypto.randomUUID(),
-        senderName: user.name,
-        senderId: user.id,
-        message: message,
-        timestamp: Date.now(),
-        type: 'buzz',
-      };
-      sendNotification(currentGroup.id, notif);
-      setCurrentGroup((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          history: [notif, ...prev.history]
-        };
-      });
-    }
-
-    if (navigator.vibrate) navigator.vibrate(50);
-  };
-
-  const handleAiBuzz = async () => {
-    if (!aiPrompt.trim()) return;
-    setIsGenerating(true);
-    const smartMessage = await generateSmartMessage(aiPrompt, user?.name || 'Someone');
-    setIsGenerating(false);
-    handleBuzz(smartMessage);
-    setShowAiModal(false);
-    setAiPrompt('');
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('buzzsync_user');
-    setUser(null);
-    setGroupsList([]);
-    setView(AppView.ONBOARDING);
-  };
-
-  // --- Render Helpers ---
-
-  const renderConnectionStatus = () => (
-    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-      isOnlineMode ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
-    }`}>
-      {isOnlineMode ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-      {isOnlineMode ? 'Online' : 'Demo Mode'}
-    </div>
-  );
-
-  // --- Views ---
-
-  const renderOnboarding = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 max-w-md mx-auto relative">
-      <button 
-        onClick={() => setShowSettings(true)}
-        className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-600 bg-white rounded-full shadow-sm"
-      >
-        <Settings className="w-5 h-5" />
-      </button>
-
-      <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mb-8 shadow-blue-200 shadow-xl">
-        <Zap className="w-10 h-10 text-white fill-current" />
-      </div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">BuzzSync</h1>
-      <p className="text-center text-gray-500 mb-6">
-        Instant notifications for your inner circle.
-      </p>
-
-      <div className="mb-8">
-         {renderConnectionStatus()}
-      </div>
-      
-      <div className="w-full space-y-4">
-        <Input 
-          placeholder="Enter your name" 
-          value={usernameInput}
-          onChange={(e) => setUsernameInput(e.target.value)}
-          autoFocus
-        />
-        <Button fullWidth onClick={handleLogin} disabled={!usernameInput.trim()}>
-          Get Started
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderHome = () => (
-    <div className="min-h-screen bg-[#F2F2F7] p-4 pb-20 max-w-md mx-auto">
-      <header className="flex justify-between items-center py-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Groups</h1>
-          <p className="text-sm text-gray-500">Welcome back, {user?.name}</p>
-        </div>
-        <div className="flex gap-2">
-          <button 
-            onClick={() => setShowSettings(true)}
-            className="p-2 bg-white rounded-full text-gray-400 hover:text-gray-600 shadow-sm"
-          >
-            <Settings size={20} />
-          </button>
-          <button onClick={handleLogout} className="p-2 bg-white rounded-full text-gray-400 hover:text-gray-600 shadow-sm">
-            <LogOut size={20} />
-          </button>
-        </div>
-      </header>
-      
-      <div className="flex justify-end mb-4">
-         {renderConnectionStatus()}
-      </div>
-
-      {/* Action Cards */}
-      <div className="grid grid-cols-1 gap-4 mb-8">
-        <div className="bg-white p-5 rounded-2xl shadow-sm">
-          <h3 className="font-semibold mb-3">Join a Group</h3>
-          <div className="flex gap-2">
-            <Input 
-              placeholder="4-digit Code" 
-              value={joinCodeInput} 
-              onChange={(e) => setJoinCodeInput(e.target.value)}
-              maxLength={4}
-              className="text-center tracking-widest font-mono"
-            />
-            <Button onClick={handleJoinGroup} disabled={joinCodeInput.length < 4 || isLoading}>
-              {isLoading ? '...' : 'Join'}
-            </Button>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl shadow-sm">
-          <h3 className="font-semibold mb-3">Create New Group</h3>
-          <div className="flex gap-2">
-            <Input 
-              placeholder="Group Name" 
-              value={groupNameInput} 
-              onChange={(e) => setGroupNameInput(e.target.value)}
-            />
-            <Button variant="secondary" onClick={handleCreateGroup} disabled={isLoading}>
-              {isLoading ? '...' : <Plus className="w-5 h-5" />}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Active Groups List */}
-      <h2 className="text-lg font-semibold text-gray-900 mb-3 px-1">Your Groups</h2>
-      <div className="space-y-3">
-        {groupsList.length === 0 ? (
-          <div className="text-center py-10 text-gray-400">
-            <Users className="w-12 h-12 mx-auto mb-2 opacity-20" />
-            <p>You haven't joined any groups yet.</p>
-          </div>
-        ) : (
-          groupsList.map((g) => (
-            <div 
-              key={g.id}
-              onClick={() => {
-                setCurrentGroup(g);
-                setView(AppView.GROUP);
-              }}
-              className="bg-white p-4 rounded-xl shadow-sm active:scale-98 transition-transform cursor-pointer flex justify-between items-center"
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-blue-500`}>
-                  {g.name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="font-semibold">{g.name}</h3>
-                  <p className="text-xs text-gray-400">Code: {g.code}</p>
-                </div>
-              </div>
-              <ChevronLeft className="rotate-180 text-gray-300 w-5 h-5" />
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-
-  const renderGroup = () => {
-    if (!currentGroup) return null;
-
-    return (
-      <div className="flex flex-col h-screen bg-gray-50 max-w-md mx-auto relative overflow-hidden">
-        {/* Header */}
-        <div className="bg-white/80 backdrop-blur-md sticky top-0 z-10 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-          <button 
-            onClick={() => setView(AppView.HOME)}
-            className="flex items-center text-blue-600 -ml-2"
-          >
-            <ChevronLeft className="w-6 h-6" />
-            <span className="text-[17px]">Back</span>
-          </button>
-          <div className="flex flex-col items-center">
-             <h1 className="font-semibold text-[17px]">{currentGroup.name}</h1>
-             <span className="text-xs text-gray-400 flex items-center gap-1">
-                {isOnlineMode && <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>}
-                Code: {currentGroup.code}
-             </span>
-          </div>
-          <button 
-             onClick={() => {
-               navigator.clipboard.writeText(currentGroup.code);
-               alert("Code copied!");
-             }}
-             className="text-blue-600"
-          >
-            <Share2 className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col items-center justify-center p-6 gap-8">
-          
-          {/* Big Button Container */}
-          <div className="relative">
-             <div className="absolute inset-0 bg-red-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-             <button
-              onClick={() => handleBuzz()}
-              className="relative w-48 h-48 rounded-full bg-gradient-to-b from-red-500 to-red-600 shadow-[0_10px_40px_-10px_rgba(239,68,68,0.5)] active:shadow-inner active:scale-95 transition-all duration-200 flex flex-col items-center justify-center text-white border-4 border-red-400/30"
-             >
-               <Zap className="w-16 h-16 mb-2 fill-white" />
-               <span className="text-xl font-bold tracking-wider">BUZZ</span>
-             </button>
-          </div>
-
-          <p className="text-gray-400 text-sm text-center max-w-[200px]">
-            {isOnlineMode 
-              ? "Tap to notify everyone in the group instantly via Bark & App"
-              : "Demo Mode: Tap to simulate locally"
-            }
-          </p>
-
-          {/* AI Trigger */}
-          <button 
-            onClick={() => setShowAiModal(true)}
-            className="flex items-center gap-2 bg-indigo-100 text-indigo-700 px-5 py-2.5 rounded-full font-medium text-sm hover:bg-indigo-200 transition-colors"
-          >
-            <Sparkles className="w-4 h-4" />
-            Send Smart Message
-          </button>
-
-        </div>
-
-        {/* Feed / History */}
-        <div className="h-1/3 bg-white border-t border-gray-200 rounded-t-3xl shadow-[0_-5px_20px_rgba(0,0,0,0.05)] flex flex-col">
-          <div className="p-4 border-b border-gray-100 flex justify-center">
-            <div className="w-12 h-1 bg-gray-300 rounded-full"></div>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-             {currentGroup.history.length === 0 && (
-                <p className="text-center text-gray-400 text-sm py-4">No recent buzzes.</p>
-             )}
-             {currentGroup.history.map((notif) => (
-               <div key={notif.id} className="flex items-start gap-3 animate-fadeIn">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${COLORS[(notif.senderName?.length || 0) % COLORS.length]}`}>
-                    {(notif.senderName || '?').charAt(0)}
-                  </div>
-                  <div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-semibold text-sm">{notif.senderName}</span>
-                      <span className="text-[10px] text-gray-400">
-                        {new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                    <p className="text-gray-700 text-sm leading-snug">{notif.message}</p>
-                  </div>
-               </div>
-             ))}
-          </div>
-        </div>
-
-        {/* AI Modal Overlay */}
-        {showAiModal && (
-          <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center">
-            <div className="bg-white w-full sm:w-[90%] sm:rounded-2xl rounded-t-2xl p-6 animate-slideUp">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-indigo-500" />
-                  AI Smart Buzz
-                </h3>
-                <button onClick={() => setShowAiModal(false)} className="text-gray-400">
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              
-              <div className="mb-4">
-                <label className="text-sm text-gray-600 mb-2 block">What's this about?</label>
-                <div className="flex gap-2 mb-3 overflow-x-auto pb-2">
-                  {['Lunch? 🍔', 'Meeting 📅', 'Emergency 🚨', 'Party 🎉'].map(tag => (
-                    <button 
-                      key={tag}
-                      onClick={() => setAiPrompt(tag)}
-                      className="whitespace-nowrap px-3 py-1.5 bg-gray-100 rounded-lg text-sm text-gray-700 hover:bg-gray-200"
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-                <Input 
-                  placeholder="e.g., 'We are late' or 'Coffee time'"
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                  autoFocus
-                />
-              </div>
-
-              <Button 
-                fullWidth 
-                onClick={handleAiBuzz} 
-                disabled={!aiPrompt || isGenerating}
-                className={isGenerating ? 'opacity-80' : ''}
-              >
-                {isGenerating ? 'Generating...' : 'Send to Group'}
-              </Button>
-            </div>
-          </div>
-        )}
-
-      </div>
-    );
-  };
+  // --- Renders ---
 
   return (
     <>
+      {/* Main View */}
+      <div className="min-h-screen bg-[#F2F2F7] flex flex-col max-w-md mx-auto relative">
+        
+        {/* Header */}
+        <header className="bg-white/80 backdrop-blur-md sticky top-0 z-10 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <Zap className="w-6 h-6 text-blue-600 fill-current" />
+            BuzzSync
+          </h1>
+          <div className="flex gap-3">
+             <button 
+               onClick={() => setIsEditMode(!isEditMode)}
+               className={`text-sm font-medium ${isEditMode ? 'text-red-500' : 'text-gray-500'}`}
+             >
+               {isEditMode ? 'Done' : 'Edit'}
+             </button>
+             <button onClick={() => setShowSettings(true)}>
+               <Settings className="w-6 h-6 text-gray-500" />
+             </button>
+          </div>
+        </header>
+
+        {/* Contacts Grid */}
+        <div className="flex-1 p-4 overflow-y-auto pb-48">
+          <div className="flex justify-between items-center mb-4">
+             <h2 className="text-gray-500 text-sm font-medium uppercase tracking-wider">
+               Receivers ({selectedIds.size})
+             </h2>
+             <button onClick={handleSelectAll} className="text-blue-600 text-sm font-medium">
+               {selectedIds.size === contacts.length ? 'None' : 'All'}
+             </button>
+          </div>
+          
+          <div className="grid grid-cols-4 gap-4">
+            {/* Add Button */}
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="aspect-square rounded-2xl bg-gray-200 flex flex-col items-center justify-center gap-1 active:scale-95 transition-all text-gray-500"
+            >
+              <Plus className="w-8 h-8" />
+              <span className="text-[10px] font-medium">Add</span>
+            </button>
+
+            {/* List */}
+            {contacts.map(contact => {
+              const isSelected = selectedIds.has(contact.id);
+              return (
+                <div key={contact.id} className="relative flex flex-col items-center gap-1">
+                  <button
+                    onClick={() => toggleSelection(contact.id)}
+                    className={`
+                      relative w-full aspect-square rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-sm transition-all
+                      ${contact.avatarColor}
+                      ${isSelected ? 'ring-4 ring-blue-500/30 scale-105' : 'opacity-60 grayscale-[0.5] scale-95'}
+                    `}
+                  >
+                    {contact.name.charAt(0).toUpperCase()}
+                    
+                    {/* Selection Indicator */}
+                    {isSelected && !isEditMode && (
+                      <div className="absolute -top-2 -right-2 bg-blue-600 rounded-full p-0.5 border-2 border-[#F2F2F7]">
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                  </button>
+                  <span className="text-[11px] font-medium text-gray-600 truncate w-full text-center">
+                    {contact.name}
+                  </span>
+
+                  {/* Delete Button (Edit Mode) */}
+                  {isEditMode && (
+                    <button 
+                      onClick={() => handleDeleteContact(contact.id)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md animate-bounce"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {contacts.length === 0 && (
+             <div className="text-center mt-10 text-gray-400">
+                <UserPlus className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                <p className="text-sm">No contacts yet.<br/>Add your friends' Bark keys.</p>
+             </div>
+          )}
+        </div>
+
+        {/* Bottom Control Panel */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 pb-8 max-w-md mx-auto rounded-t-3xl shadow-[0_-5px_30px_rgba(0,0,0,0.1)]">
+          
+          {/* AI Helper Toggle */}
+          <div className="mb-3 flex gap-2">
+             <div className="relative flex-1">
+               <input
+                 className="w-full bg-gray-100 rounded-xl px-4 py-3 pr-10 text-[15px] outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                 placeholder="Message (optional)..."
+                 value={message}
+                 onChange={(e) => setMessage(e.target.value)}
+                 onKeyDown={(e) => e.key === 'Enter' && broadcast()}
+               />
+               <button 
+                 onClick={() => setAiPrompt(message || 'Hurry up')}
+                 className="absolute right-2 top-2 p-1 text-gray-400 hover:text-indigo-500 transition-colors"
+                 title="AI Magic"
+               >
+                 <Sparkles className="w-5 h-5" />
+               </button>
+             </div>
+          </div>
+
+          {/* AI Expand Area */}
+          {aiPrompt && (
+             <div className="mb-3 flex items-center gap-2 animate-fadeIn bg-indigo-50 p-2 rounded-lg">
+                <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
+                <span className="text-xs text-indigo-700 font-medium">AI: Generating smart text...</span>
+                <div className="flex-1"></div>
+             </div>
+          )}
+
+          <Button 
+            fullWidth 
+            onClick={() => broadcast()}
+            disabled={isSending || selectedIds.size === 0}
+            className={`h-14 text-lg shadow-blue-300 shadow-lg ${isSending ? 'opacity-80' : ''}`}
+          >
+            {isSending ? 'Sending...' : `Buzz ${selectedIds.size} People`}
+            {!isSending && <Zap className="w-5 h-5 fill-white" />}
+          </Button>
+        </div>
+
+      </div>
+
+      {/* Settings Modal (My Profile) */}
       <SettingsModal 
         isOpen={showSettings} 
         onClose={() => setShowSettings(false)}
-        onSave={handleSaveSettings}
+        onSave={() => setShowSettings(false)}
       />
 
-      <NotificationToast 
-        notification={activeNotification} 
-        onDismiss={() => setActiveNotification(null)} 
-      />
-      
-      {view === AppView.ONBOARDING && renderOnboarding()}
-      {view === AppView.HOME && renderHome()}
-      {view === AppView.GROUP && renderGroup()}
+      {/* Add Contact Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+          <div className="bg-white w-full max-w-sm rounded-2xl p-6 animate-slideUp">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">Add Contact</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-gray-400">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <Input 
+                placeholder="Name (e.g. Jack)" 
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                autoFocus
+              />
+              <div>
+                <Input 
+                  placeholder="Bark Key or URL" 
+                  value={newKey}
+                  onChange={(e) => setNewKey(e.target.value)}
+                  className="font-mono text-sm"
+                />
+                <p className="text-[10px] text-gray-400 mt-1 ml-1">
+                  Paste the full link from their Bark app
+                </p>
+              </div>
+              <Button fullWidth onClick={handleAddContact} disabled={!newName || !newKey}>
+                Save Contact
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
