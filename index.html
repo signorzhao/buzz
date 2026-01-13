@@ -19,15 +19,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-      body {
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        position: fixed; /* Critical for iOS: locks the viewport */
+        overflow: hidden; /* Prevent document scroll */
+        background-color: #F2F2F7;
         font-family: 'Inter', sans-serif;
         -webkit-tap-highlight-color: transparent;
-        background-color: #F2F2F7; /* iOS System Gray 6 */
-        /* Safe area handling for iPhone Notch/Island */
-        /* padding-top removed to allow header to cover status bar area */
-        padding-bottom: env(safe-area-inset-bottom);
-        height: 100vh;
-        overflow: hidden;
+        /* Padding bottom is handled in the app layout now to accommodate keyboard correctly */
       }
       /* Hide scrollbar for cleaner mobile look */
       ::-webkit-scrollbar {
@@ -36,7 +38,7 @@
       }
       #root {
         height: 100%;
-        overflow-y: auto;
+        width: 100%;
       }
     </style>
   <script type="importmap">

@@ -1,22 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { Contact } from './types';
-import { BARK_SERVER } from './constants';
+import { BARK_SERVER, QUICK_ACTIONS } from './constants';
 import { getContacts, saveContact, deleteContact, getMyProfile } from './services/storageService';
-import { generateSmartMessage } from './services/geminiService';
 import { Button } from './components/Button';
 import { Input } from './components/Input';
 import { SettingsModal } from './components/SettingsModal';
 import { 
   Plus, 
   Zap, 
-  Sparkles, 
   Settings,
   Trash2,
   CheckCircle2,
-  Circle,
   UserPlus,
-  X
+  X,
+  Coffee,
+  Cigarette,
+  Utensils,
+  Beer,
+  Gamepad2,
+  Timer,
+  Car,
+  HelpCircle
 } from 'lucide-react';
+
+// Icon Map helper
+const IconMap: Record<string, React.FC<any>> = {
+  Coffee,
+  Cigarette,
+  Utensils,
+  Beer,
+  Gamepad2,
+  Timer,
+  Car,
+  HelpCircle
+};
 
 const App: React.FC = () => {
   // Data State
@@ -28,11 +45,7 @@ const App: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  
-  // Input State
-  const [message, setMessage] = useState('');
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [lastSentMessage, setLastSentMessage] = useState<string | null>(null);
 
   // New Contact Inputs
   const [newName, setNewName] = useState('');
@@ -95,8 +108,7 @@ const App: React.FC = () => {
     }
   };
 
-  const broadcast = async (msgOverride?: string) => {
-    const finalMessage = msgOverride || message || "BUZZ! ⚡️";
+  const broadcast = async (msgContent: string) => {
     const targets = contacts.filter(c => selectedIds.has(c.id));
 
     if (targets.length === 0) {
@@ -111,7 +123,7 @@ const App: React.FC = () => {
     const senderName = myProfile.name || 'Friend';
     
     // Encode Message
-    const encodedMsg = encodeURIComponent(finalMessage);
+    const encodedMsg = encodeURIComponent(msgContent);
     const encodedTitle = encodeURIComponent(`${senderName} via BuzzSync`);
     const icon = encodeURIComponent('https://api.iconify.design/lucide:zap.svg?color=%23ef4444');
 
@@ -126,36 +138,29 @@ const App: React.FC = () => {
     await Promise.all(promises);
 
     setIsSending(false);
-    setMessage(''); // Clear message after send
+    setLastSentMessage(msgContent);
     if (navigator.vibrate) navigator.vibrate([50, 50, 200]);
-    alert(`Sent to ${targets.length} people!`);
+    
+    // Reset status message after a few seconds
+    setTimeout(() => setLastSentMessage(null), 3000);
   };
 
-  const handleAiGenerate = async () => {
-    if (!aiPrompt) return;
-    setIsAiGenerating(true);
-    const myProfile = getMyProfile();
-    const generated = await generateSmartMessage(aiPrompt, myProfile.name || 'Sender');
-    setMessage(generated);
-    setAiPrompt('');
-    setIsAiGenerating(false);
+  const handleQuickAction = (action: typeof QUICK_ACTIONS[0]) => {
+    if (isSending) return;
+    // Pick random message
+    const randomMsg = action.messages[Math.floor(Math.random() * action.messages.length)];
+    broadcast(randomMsg);
   };
-
-  useEffect(() => {
-    if (aiPrompt && !isAiGenerating) {
-      handleAiGenerate();
-    }
-  }, [aiPrompt]);
 
   // --- Renders ---
 
   return (
     <>
-      {/* Main View */}
-      <div className="min-h-screen bg-[#F2F2F7] flex flex-col max-w-md mx-auto relative">
+      {/* Main Container: Full viewport height, locked scroll */}
+      <div className="h-full w-full bg-[#F2F2F7] flex flex-col max-w-md mx-auto overflow-hidden">
         
-        {/* Header */}
-        <header className="bg-white/80 backdrop-blur-md sticky top-0 z-10 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] border-b border-gray-200 flex items-center justify-between transition-all">
+        {/* Header: Static at top of flex container */}
+        <header className="bg-white/90 backdrop-blur-md px-4 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] border-b border-gray-200 flex items-center justify-between shrink-0 z-10 shadow-sm">
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Zap className="w-6 h-6 text-blue-600 fill-current" />
             BuzzSync
@@ -173,8 +178,8 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {/* Contacts Grid */}
-        <div className="flex-1 p-4 overflow-y-auto pb-48">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
           <div className="flex justify-between items-center mb-4">
              <h2 className="text-gray-500 text-sm font-medium uppercase tracking-wider">
                Receivers ({selectedIds.size})
@@ -184,7 +189,7 @@ const App: React.FC = () => {
              </button>
           </div>
           
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-4 gap-4 pb-4">
             {/* Add Button */}
             <button 
               onClick={() => setShowAddModal(true)}
@@ -242,46 +247,48 @@ const App: React.FC = () => {
           )}
         </div>
 
-        {/* Bottom Control Panel */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 pb-8 max-w-md mx-auto rounded-t-3xl shadow-[0_-5px_30px_rgba(0,0,0,0.1)]">
+        {/* Footer: Quick Actions + Main Buzz */}
+        <div className="bg-white border-t border-gray-200 p-4 pb-[calc(env(safe-area-inset-bottom)+20px)] shrink-0 shadow-[0_-5px_30px_rgba(0,0,0,0.05)] z-20">
           
-          {/* AI Helper Toggle */}
-          <div className="mb-3 flex gap-2">
-             <div className="relative flex-1">
-               <input
-                 className="w-full bg-gray-100 rounded-xl px-4 py-3 pr-10 text-[15px] outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                 placeholder="Message (optional)..."
-                 value={message}
-                 onChange={(e) => setMessage(e.target.value)}
-                 onKeyDown={(e) => e.key === 'Enter' && broadcast()}
-               />
-               <button 
-                 onClick={() => setAiPrompt(message || 'Hurry up')}
-                 className="absolute right-2 top-2 p-1 text-gray-400 hover:text-indigo-500 transition-colors"
-                 title="AI Magic"
-               >
-                 <Sparkles className="w-5 h-5" />
-               </button>
-             </div>
+          {/* Quick Action Grid */}
+          <div className="grid grid-cols-4 gap-3 mb-4">
+            {QUICK_ACTIONS.map(action => {
+              const Icon = IconMap[action.iconName];
+              return (
+                <button
+                  key={action.id}
+                  onClick={() => handleQuickAction(action)}
+                  disabled={isSending || selectedIds.size === 0}
+                  className={`
+                    flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all active:scale-90
+                    ${action.color} 
+                    ${isSending || selectedIds.size === 0 ? 'opacity-50 grayscale' : 'hover:brightness-95'}
+                  `}
+                >
+                  <Icon className="w-6 h-6" />
+                  <span className="text-[10px] font-semibold">{action.label}</span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* AI Expand Area */}
-          {aiPrompt && (
-             <div className="mb-3 flex items-center gap-2 animate-fadeIn bg-indigo-50 p-2 rounded-lg">
-                <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
-                <span className="text-xs text-indigo-700 font-medium">AI: Generating smart text...</span>
-                <div className="flex-1"></div>
-             </div>
-          )}
-
+          {/* Fallback Main Buzz Button */}
           <Button 
             fullWidth 
-            onClick={() => broadcast()}
+            onClick={() => broadcast("BUZZ! ⚡️")}
             disabled={isSending || selectedIds.size === 0}
-            className={`h-14 text-lg shadow-blue-300 shadow-lg ${isSending ? 'opacity-80' : ''}`}
+            className={`h-12 text-lg shadow-blue-300 shadow-lg ${isSending ? 'opacity-80' : ''}`}
           >
-            {isSending ? 'Sending...' : `Buzz ${selectedIds.size} People`}
-            {!isSending && <Zap className="w-5 h-5 fill-white" />}
+            {isSending ? (
+              <span className="animate-pulse">Sending...</span>
+            ) : lastSentMessage ? (
+              <span className="text-sm truncate">Sent: "{lastSentMessage}"</span>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span>Buzz Only</span>
+                <Zap className="w-5 h-5 fill-white" />
+              </div>
+            )}
           </Button>
         </div>
 
@@ -297,7 +304,7 @@ const App: React.FC = () => {
       {/* Add Contact Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-6 animate-slideUp">
+          <div className="bg-white w-full max-w-sm rounded-2xl p-6 animate-slideUp mb-[env(safe-area-inset-bottom)]">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold">Add Contact</h3>
               <button onClick={() => setShowAddModal(false)} className="text-gray-400">
