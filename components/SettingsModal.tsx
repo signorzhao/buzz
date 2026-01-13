@@ -1,50 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './Button';
 import { Input } from './Input';
-import { X, Server, Database, Smartphone, Info } from 'lucide-react';
+import { X, Server, Database, Smartphone, Info, Bell } from 'lucide-react';
 import QRCode from 'qrcode';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (url: string, key: string) => void;
+  onSave: (url: string, key: string, barkUrl: string) => void;
 }
 
 export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
   const [sbUrl, setSbUrl] = useState('');
   const [sbKey, setSbKey] = useState('');
+  const [barkUrl, setBarkUrl] = useState('');
   const [qrSrc, setQrSrc] = useState<string>('');
   
-  // This is the URL base (http://ip:port) that the user can edit
   const [baseUrl, setBaseUrl] = useState('');
 
   useEffect(() => {
     if (isOpen) {
-      // 1. Load Supabase Creds
+      // Load Supabase Creds
       const storedSbUrl = localStorage.getItem('sb_url') || '';
       const storedSbKey = localStorage.getItem('sb_key') || '';
+      const storedBarkUrl = localStorage.getItem('bark_url') || '';
       setSbUrl(storedSbUrl);
       setSbKey(storedSbKey);
+      setBarkUrl(storedBarkUrl);
       
-      // 2. Load Base URL (User preference or default to window location)
+      // Load Base URL
       const storedBaseUrl = localStorage.getItem('buzzsync_base_url');
       if (storedBaseUrl) {
         setBaseUrl(storedBaseUrl);
       } else {
-        // Default: Strip search params to get clean origin+path
         setBaseUrl(window.location.origin + window.location.pathname);
       }
     }
   }, [isOpen]);
 
-  // Handle Base URL Changes
   const handleBaseUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setBaseUrl(val);
     localStorage.setItem('buzzsync_base_url', val);
   };
 
-  // Handle Credential Changes (Auto-save to prevent data loss)
   const handleSbUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSbUrl(val);
@@ -57,19 +56,36 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
     localStorage.setItem('sb_key', val);
   };
 
-  // Generate QR Code whenever base URL or credentials change
+  const handleBarkUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setBarkUrl(val);
+    localStorage.setItem('bark_url', val);
+  };
+
+  const handleTestBark = async () => {
+    if (!barkUrl) return alert("Please enter a Bark URL first");
+    try {
+      // Bark API format: URL/Message
+      let cleanUrl = barkUrl.endsWith('/') ? barkUrl.slice(0, -1) : barkUrl;
+      await fetch(`${cleanUrl}/BuzzSync Test/This is a test notification?group=buzzsync`);
+      alert("Sent! Check your notification center.");
+    } catch (e) {
+      alert("Failed to send test. Check URL.");
+    }
+  };
+
+  // Generate QR Code
   useEffect(() => {
     if (!baseUrl) return;
 
     let finalQrUrl = baseUrl;
-    
-    // Ensure protocol exists for valid QR scanning
     if (!finalQrUrl.startsWith('http://') && !finalQrUrl.startsWith('https://')) {
        finalQrUrl = `http://${finalQrUrl}`;
     }
     
     if (sbUrl && sbKey) {
        const separator = finalQrUrl.includes('?') ? '&' : '?';
+       // We only pass supabase creds, bark url is personal per device
        finalQrUrl = `${finalQrUrl}${separator}sbUrl=${encodeURIComponent(sbUrl)}&sbKey=${encodeURIComponent(sbKey)}`;
     }
 
@@ -98,8 +114,32 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
           </button>
         </div>
 
+        {/* Bark Section */}
+        <div className="mb-6 bg-orange-50 p-4 rounded-xl border border-orange-100">
+          <h4 className="text-sm font-semibold text-orange-800 mb-2 flex items-center gap-2">
+            <Bell className="w-4 h-4" />
+            iOS Native Push (Bark)
+          </h4>
+          <p className="text-xs text-orange-700 mb-3 leading-relaxed">
+            1. Install "Bark" from App Store.<br/>
+            2. Copy your unique server URL from the app.<br/>
+            3. Paste it below to receive group buzzes.
+          </p>
+          <div className="flex gap-2">
+            <Input
+              placeholder="https://api.day.app/YourKey..."
+              value={barkUrl}
+              onChange={handleBarkUrlChange}
+              className="text-xs"
+            />
+            <Button variant="secondary" onClick={handleTestBark} disabled={!barkUrl} className="px-3">
+              Test
+            </Button>
+          </div>
+        </div>
+
         {/* Supabase Section */}
-        <div className="space-y-4 mb-8">
+        <div className="space-y-4 mb-8 border-t border-gray-100 pt-6">
           <div className="bg-blue-50 p-4 rounded-xl text-sm text-blue-800">
             <p className="font-semibold mb-1 flex items-center gap-2">
               <Database className="w-4 h-4" />
@@ -139,13 +179,6 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
               onChange={handleBaseUrlChange}
               placeholder="192.168.1.x:3000"
             />
-            <p className="text-[10px] text-gray-400 mt-1 ml-1 flex items-start gap-1">
-              <Info className="w-3 h-3 shrink-0 mt-0.5" />
-              <span>
-                Your phone needs this to load the <b>App Interface</b>. <br/>
-                Once loaded, the App connects to Supabase directly via internet.
-              </span>
-            </p>
           </div>
 
           <div className="bg-gray-50 rounded-xl p-4 flex flex-col items-center transition-all">
@@ -166,22 +199,21 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
           <Button 
             variant="ghost" 
             onClick={() => {
-              // Clear credentials to use Offline Mode
               localStorage.removeItem('sb_url');
               localStorage.removeItem('sb_key');
-              onSave('', '');
+              localStorage.removeItem('bark_url');
+              onSave('', '', '');
               onClose();
             }}
             className="flex-1"
           >
-            Reset / Offline
+            Reset
           </Button>
           <Button 
             fullWidth 
             className="flex-1"
             onClick={() => {
-              // Trigger onSave to refresh App state with current inputs
-              onSave(sbUrl, sbKey);
+              onSave(sbUrl, sbKey, barkUrl);
               onClose();
             }}
           >

@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Group, Notification, User } from '../types';
+import { TABLES } from '../constants';
 
 let supabase: SupabaseClient | null = null;
 
@@ -16,14 +17,51 @@ export const initSupabase = (url: string, key: string) => {
 
 export const isSupabaseConfigured = () => !!supabase;
 
+// Helper to register presence and Bark URL
+const registerMember = async (groupId: string, user: User) => {
+  if (!supabase) return;
+  
+  // Upsert member to store/update their Bark URL
+  const { error } = await supabase
+    .from(TABLES.MEMBERS)
+    .upsert({
+      group_id: groupId,
+      user_id: user.id,
+      user_name: user.name,
+      bark_url: user.barkUrl || null,
+      last_seen: new Date().toISOString()
+    }, { onConflict: 'group_id,user_id' });
+
+  if (error) {
+    console.warn(`Could not register member (table '${TABLES.MEMBERS}' might be missing):`, error.message);
+  }
+};
+
+export const sbGetGroupMembers = async (groupId: string): Promise<User[]> => {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from(TABLES.MEMBERS)
+    .select('*')
+    .eq('group_id', groupId);
+
+  if (error || !data) return [];
+
+  return data.map((row: any) => ({
+    id: row.user_id,
+    name: row.user_name,
+    avatarColor: 'bg-gray-500',
+    barkUrl: row.bark_url
+  }));
+};
+
 export const sbCreateGroup = async (name: string, creator: User): Promise<Group | null> => {
   if (!supabase) return null;
   
   const code = Math.floor(1000 + Math.random() * 9000).toString();
   
-  // Use 'buzz_groups' to avoid collision with other apps in the same Supabase project
   const { data, error } = await supabase
-    .from('buzz_groups')
+    .from(TABLES.GROUPS)
     .insert([{ name, code }])
     .select()
     .single();
@@ -32,6 +70,9 @@ export const sbCreateGroup = async (name: string, creator: User): Promise<Group 
     console.error('Error creating group:', error);
     return null;
   }
+
+  // Register creator
+  await registerMember(data.id, creator);
 
   return {
     id: data.id,
@@ -45,9 +86,9 @@ export const sbCreateGroup = async (name: string, creator: User): Promise<Group 
 export const sbJoinGroup = async (code: string, user: User): Promise<Group | null> => {
   if (!supabase) return null;
 
-  // 1. Find group in 'buzz_groups'
+  // 1. Find group
   const { data: groupData, error } = await supabase
-    .from('buzz_groups')
+    .from(TABLES.GROUPS)
     .select('*')
     .eq('code', code)
     .single();
@@ -56,9 +97,12 @@ export const sbJoinGroup = async (code: string, user: User): Promise<Group | nul
     return null;
   }
 
-  // 2. Fetch recent history from 'buzz_notifications'
+  // 2. Register User (and their Bark URL)
+  await registerMember(groupData.id, user);
+
+  // 3. Fetch recent history
   const { data: historyData } = await supabase
-    .from('buzz_notifications')
+    .from(TABLES.NOTIFICATIONS)
     .select('*')
     .eq('group_id', groupData.id)
     .order('created_at', { ascending: false })
@@ -86,7 +130,7 @@ export const sbSendNotification = async (groupId: string, user: User, message: s
   if (!supabase) return;
 
   await supabase
-    .from('buzz_notifications')
+    .from(TABLES.NOTIFICATIONS)
     .insert([{
       group_id: groupId,
       sender_id: user.id,
@@ -106,7 +150,7 @@ export const sbSubscribeToGroup = (groupId: string, onNotification: (n: Notifica
       { 
         event: 'INSERT', 
         schema: 'public', 
-        table: 'buzz_notifications', // Listen to the prefixed table
+        table: TABLES.NOTIFICATIONS, 
         filter: `group_id=eq.${groupId}` 
       },
       (payload) => {

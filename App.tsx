@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { User, Group, AppView, Notification } from './types';
 import { COLORS } from './constants';
 import { createGroup, joinGroup, sendNotification, simulateIncomingNotification, getGroup } from './services/mockBackend';
-import { initSupabase, sbCreateGroup, sbJoinGroup, sbSendNotification, sbSubscribeToGroup, isSupabaseConfigured } from './services/supabaseService';
+import { initSupabase, sbCreateGroup, sbJoinGroup, sbSendNotification, sbSubscribeToGroup, isSupabaseConfigured, sbGetGroupMembers } from './services/supabaseService';
 import { generateSmartMessage } from './services/geminiService';
 import { Button } from './components/Button';
 import { Input } from './components/Input';
@@ -32,6 +32,7 @@ const App: React.FC = () => {
   // App Mode State
   const [isOnlineMode, setIsOnlineMode] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [userBarkUrl, setUserBarkUrl] = useState('');
   
   // UI State
   const [usernameInput, setUsernameInput] = useState('');
@@ -58,18 +59,22 @@ const App: React.FC = () => {
     if (urlParam && keyParam) {
       localStorage.setItem('sb_url', urlParam);
       localStorage.setItem('sb_key', keyParam);
-      // Clean URL without refreshing
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // 1. Check User
+    // 1. Check User & Bark
     const storedUser = localStorage.getItem('buzzsync_user');
+    const storedBark = localStorage.getItem('bark_url') || '';
+    setUserBarkUrl(storedBark);
+
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      // Ensure barkUrl is synced to user object
+      setUser({ ...parsedUser, barkUrl: storedBark });
       setView(AppView.HOME);
     }
 
-    // 2. Check Supabase Config (load from local storage, possibly just set above)
+    // 2. Check Supabase Config
     const sbUrl = localStorage.getItem('sb_url');
     const sbKey = localStorage.getItem('sb_key');
     if (sbUrl && sbKey) {
@@ -86,8 +91,6 @@ const App: React.FC = () => {
     if (isOnlineMode) {
       // --- ONLINE MODE: Supabase Subscription ---
       const unsubscribe = sbSubscribeToGroup(currentGroup.id, (notif) => {
-        // Prevent duplicate toasts if we just sent it ourselves
-        // (Supabase sends back our own inserts)
         if (notif.senderId !== user?.id) {
            triggerNotification(notif);
         }
@@ -95,7 +98,6 @@ const App: React.FC = () => {
         // Update History
         setCurrentGroup(prev => {
           if (!prev) return null;
-          // Avoid duplicates in history just in case
           if (prev.history.find(h => h.id === notif.id)) return prev;
           return { ...prev, history: [notif, ...prev.history] };
         });
@@ -146,9 +148,17 @@ const App: React.FC = () => {
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
   };
 
-  const handleSaveSettings = (url: string, key: string) => {
+  const handleSaveSettings = (url: string, key: string, bark: string) => {
     const success = initSupabase(url, key);
     setIsOnlineMode(success);
+    setUserBarkUrl(bark);
+    if(user) {
+        // Update current user state with new bark url
+        const updatedUser = { ...user, barkUrl: bark };
+        setUser(updatedUser);
+        localStorage.setItem('buzzsync_user', JSON.stringify(updatedUser));
+    }
+    
     if (!success) {
       alert("Switched to Offline Demo Mode");
     } else {
@@ -162,6 +172,7 @@ const App: React.FC = () => {
       id: crypto.randomUUID(),
       name: usernameInput.trim(),
       avatarColor: COLORS[Math.floor(Math.random() * COLORS.length)],
+      barkUrl: userBarkUrl
     };
     setUser(newUser);
     localStorage.setItem('buzzsync_user', JSON.stringify(newUser));
@@ -221,19 +232,46 @@ const App: React.FC = () => {
     }
   };
 
+  const broadcastViaBark = async (groupId: string, message: string) => {
+    if (!isOnlineMode) return;
+    try {
+      // 1. Get all members of this group from Supabase
+      const members = await sbGetGroupMembers(groupId);
+      
+      // 2. Filter out self and members without barkUrl
+      const targets = members.filter(m => m.id !== user?.id && m.barkUrl);
+
+      console.log(`Broadcasting via Bark to ${targets.length} users...`);
+
+      // 3. Fire requests
+      targets.forEach(member => {
+         if (member.barkUrl) {
+            let cleanUrl = member.barkUrl.endsWith('/') ? member.barkUrl.slice(0, -1) : member.barkUrl;
+            const title = encodeURIComponent(`Buzz from ${user?.name || 'Group'}`);
+            const body = encodeURIComponent(message);
+            // Fire and forget, no await to speed up
+            fetch(`${cleanUrl}/${title}/${body}?group=buzzsync&icon=https://api.iconify.design/lucide:zap.svg?color=%232563eb`)
+              .catch(e => console.error("Bark failed for user", member.name));
+         }
+      });
+    } catch (e) {
+      console.error("Broadcast failed", e);
+    }
+  };
+
   const handleBuzz = async (messageOverride?: string) => {
     if (!user || !currentGroup) return;
 
     const message = messageOverride || "Buzzed you! 🔔";
     
     if (isOnlineMode) {
-      // Online: Fire and forget (Optimistic update done via subscription or below)
+      // 1. Update In-App History
       await sbSendNotification(currentGroup.id, user, message);
-      // Note: We don't manually update state here because the Subscription will catch our own message 
-      // BUT for immediate responsiveness, we could. However, Supabase echoes back fast enough usually.
-      // To be safe and super snappy, let's optimistically update:
+      
+      // 2. Broadcast Native Push via Bark
+      broadcastViaBark(currentGroup.id, message);
     } else {
-      // Offline
+      // Offline Simulation
       const notif: Notification = {
         id: crypto.randomUUID(),
         senderName: user.name,
@@ -461,7 +499,7 @@ const App: React.FC = () => {
 
           <p className="text-gray-400 text-sm text-center max-w-[200px]">
             {isOnlineMode 
-              ? "Tap to notify everyone in the group instantly"
+              ? "Tap to notify everyone in the group instantly via Bark & App"
               : "Demo Mode: Tap to simulate locally"
             }
           </p>

@@ -12,3 +12,11 @@ export const COLORS = [
 export const MOCK_DELAY = 600; // ms to simulate network
 
 export const SYSTEM_USER_ID = 'system';
+
+// Database Table Configuration
+// Modify these prefixes if they conflict with your existing Supabase tables
+export const TABLES = {
+  GROUPS: 'buzz_groups',
+  MEMBERS: 'buzz_members',
+  NOTIFICATIONS: 'buzz_notifications'
+};

@@ -2,6 +2,7 @@ export interface User {
   id: string;
   name: string;
   avatarColor: string;
+  barkUrl?: string;
 }
 
 export interface Notification {
