@@ -155,7 +155,7 @@ const App: React.FC = () => {
       <div className="min-h-screen bg-[#F2F2F7] flex flex-col max-w-md mx-auto relative">
         
         {/* Header */}
-        <header className="bg-white/80 backdrop-blur-md sticky top-0 z-10 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+        <header className="bg-white/80 backdrop-blur-md sticky top-0 z-10 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] border-b border-gray-200 flex items-center justify-between transition-all">
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Zap className="w-6 h-6 text-blue-600 fill-current" />
             BuzzSync
