@@ -10,12 +10,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="format-detection" content="telephone=no" />
     
+    <!-- iOS Home Screen Icon -->
+    <link rel="apple-touch-icon" href="/icon.svg" />
+    
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
     
     <title>BuzzSync</title>
-    <!-- We keep Tailwind CDN for simplicity in this specific setup to avoid PostCSS config file overhead, 
-         though in a full pro setup you'd install it via npm. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -24,14 +25,12 @@
         padding: 0;
         width: 100%;
         height: 100%;
-        position: fixed; /* Critical for iOS: locks the viewport */
-        overflow: hidden; /* Prevent document scroll */
+        position: fixed;
+        overflow: hidden;
         background-color: #F2F2F7;
         font-family: 'Inter', sans-serif;
         -webkit-tap-highlight-color: transparent;
-        /* Padding bottom is handled in the app layout now to accommodate keyboard correctly */
       }
-      /* Hide scrollbar for cleaner mobile look */
       ::-webkit-scrollbar {
         width: 0px;
         background: transparent;
@@ -60,17 +59,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
-    <script>
-      // Register Service Worker for PWA capabilities
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then(registration => {
-            console.log('SW registered: ', registration);
-          }).catch(registrationError => {
-            console.log('SW registration failed: ', registrationError);
-          });
-        });
-      }
-    </script>
   </body>
 </html>
