@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './Button';
 import { Input } from './Input';
-import { X, ChevronRight, Palette, Copy, Download, Upload, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { X, ChevronRight, Palette, Copy, Download, Upload, RefreshCw, CheckCircle2, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
 import { 
   getMyProfile, 
   saveMyProfile, 
@@ -27,6 +27,7 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const [copied, setCopied] = useState(false);
   const [importError, setImportError] = useState(false);
   const [importSuccess, setImportSuccess] = useState(false);
+  const [expandedActionId, setExpandedActionId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -79,6 +80,11 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
     setActions(prev => prev.map(a => a.id === id ? { ...a, label } : a));
   };
 
+  const updateActionMessages = (id: string, text: string) => {
+    const messageList = text.split('\n').filter(m => m.trim() !== '');
+    setActions(prev => prev.map(a => a.id === id ? { ...a, messages: messageList } : a));
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -105,7 +111,7 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </section>
 
           <section className="space-y-4">
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">自定义按钮背景颜色</h4>
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">自定义按钮与话术</h4>
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm divide-y divide-gray-50">
               {actions.map((action) => (
                 <div key={action.id} className="p-4">
@@ -120,9 +126,26 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
                          onChange={(e) => updateActionLabel(action.id, e.target.value)}
                        />
                     </div>
-                    <span className="text-xs text-gray-400">点击下方选色</span>
+                    <button 
+                      onClick={() => setExpandedActionId(expandedActionId === action.id ? null : action.id)}
+                      className="text-blue-600 p-1 rounded-full hover:bg-blue-50 transition-colors"
+                    >
+                      {expandedActionId === action.id ? <ChevronUp className="w-5 h-5" /> : <div className="flex items-center gap-1 text-xs font-medium"><MessageSquare className="w-4 h-4" />编辑话术</div>}
+                    </button>
                   </div>
                   
+                  {expandedActionId === action.id && (
+                    <div className="mt-3 mb-4 animate-in slide-in-from-top-2 duration-200">
+                      <label className="text-[11px] font-bold text-gray-400 uppercase mb-2 block ml-1">随机话术 (每行一句)</label>
+                      <textarea 
+                        className="w-full bg-gray-50 rounded-xl p-3 text-sm border-none ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 outline-none h-28 resize-none"
+                        value={action.messages.join('\n')}
+                        onChange={(e) => updateActionMessages(action.id, e.target.value)}
+                        placeholder="每行输入一句随机话术..."
+                      />
+                    </div>
+                  )}
+
                   <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
                     {ACTION_LIGHT_COLORS.map(color => (
                       <button
@@ -137,13 +160,12 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
             </div>
           </section>
 
-          {/* 方案 2: 备份与恢复 */}
           <section className="space-y-4">
             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">数据备份与恢复</h4>
             <div className="bg-white rounded-2xl p-4 shadow-sm space-y-4">
               <div>
                 <p className="text-sm text-gray-500 mb-3">
-                  你可以将当前的联系人和设置备份为一段代码，保存到备忘录。下次使用时粘贴回来即可恢复。
+                  可以将当前的联系人、自定义颜色及<b>随机话术</b>备份为一段代码。
                 </p>
                 <Button variant="secondary" fullWidth onClick={handleCopyConfig} className="gap-2">
                   {copied ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
