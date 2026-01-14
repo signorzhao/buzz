@@ -1,14 +1,10 @@
+
 import { GoogleGenAI } from "@google/genai";
 
-const apiKey = process.env.API_KEY || '';
-const ai = new GoogleGenAI({ apiKey });
+// Fix: Correctly initialize GoogleGenAI with process.env.API_KEY as per instructions
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const generateSmartMessage = async (context: string, senderName: string): Promise<string> => {
-  if (!apiKey) {
-    console.warn("No API Key provided, returning fallback.");
-    return `Hey everyone, ${context}!`;
-  }
-
   try {
     const model = 'gemini-3-flash-preview';
     const prompt = `
@@ -21,11 +17,13 @@ export const generateSmartMessage = async (context: string, senderName: string):
       Do not use quotes in the output. Just the message.
     `;
 
+    // Fix: Using correct direct model and prompt call
     const response = await ai.models.generateContent({
       model,
       contents: prompt,
     });
 
+    // Fix: Access response.text property directly
     return response.text?.trim() || context;
   } catch (error) {
     console.error("Gemini API Error:", error);

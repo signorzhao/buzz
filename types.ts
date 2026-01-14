@@ -1,25 +1,23 @@
+
 export interface Contact {
   id: string;
   name: string;
-  barkKey: string; // The key part of https://api.day.app/KEY/
+  barkKey: string;
   avatarColor: string;
 }
 
-export enum AppView {
-  HOME = 'HOME',
-  SETTINGS = 'SETTINGS',
-}
-
-export interface NotificationState {
-  message: string;
-  type: 'success' | 'error';
-}
-
-export interface User {
+export interface QuickActionConfig {
   id: string;
+  label: string;
+  iconName: string;
+  colorClass: string;
+  messages: string[];
+}
+
+export interface UserProfile {
   name: string;
+  barkKey: string;
   avatarColor?: string;
-  barkUrl?: string;
 }
 
 export interface Notification {
@@ -31,6 +29,19 @@ export interface Notification {
   type: 'buzz' | 'message';
 }
 
+/**
+ * User interface used in group/collaboration services
+ */
+export interface User {
+  id: string;
+  name: string;
+  avatarColor?: string;
+  barkUrl?: string;
+}
+
+/**
+ * Group interface for group-based notification syncing
+ */
 export interface Group {
   id: string;
   name: string;

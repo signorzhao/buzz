@@ -1,81 +1,55 @@
 import React, { useState, useEffect } from 'react';
-import { Contact } from './types';
-import { BARK_SERVER, QUICK_ACTIONS } from './constants';
-import { getContacts, saveContact, deleteContact, getMyProfile } from './services/storageService';
+import { Contact, QuickActionConfig } from './types';
+import { BARK_SERVER, AVATAR_COLORS } from './constants';
+import { getContacts, saveContact, deleteContact, getMyProfile, getQuickActions } from './services/storageService';
 import { Button } from './components/Button';
 import { Input } from './components/Input';
 import { SettingsModal } from './components/SettingsModal';
 import { 
-  Plus, 
-  Zap, 
-  Settings,
-  Trash2,
-  CheckCircle2,
-  UserPlus,
-  X,
-  Coffee,
-  Cigarette,
-  Utensils,
-  Beer,
-  Gamepad2,
-  Timer,
-  Car,
-  HelpCircle
+  Plus, Zap, Settings, Trash2, CheckCircle2, UserPlus, X, 
+  Coffee, Cigarette, Utensils, Beer, Gamepad2, Timer, Car, 
+  HelpCircle, Beef, Ban, Brain, Loader2, Check, Minus
 } from 'lucide-react';
 
-// Icon Map helper
 const IconMap: Record<string, React.FC<any>> = {
-  Coffee,
-  Cigarette,
-  Utensils,
-  Beer,
-  Gamepad2,
-  Timer,
-  Car,
-  HelpCircle
+  Coffee, Cigarette, Utensils, Beer, Gamepad2, Timer, Car, HelpCircle, Beef, CheckCircle2, Ban, Brain
 };
 
 const App: React.FC = () => {
-  // Data State
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [quickActions, setQuickActions] = useState<QuickActionConfig[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  
-  // UI State
   const [showSettings, setShowSettings] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [sendSuccess, setSendSuccess] = useState(false);
   const [lastSentMessage, setLastSentMessage] = useState<string | null>(null);
 
-  // New Contact Inputs
   const [newName, setNewName] = useState('');
   const [newKey, setNewKey] = useState('');
 
-  // Initial Load
   useEffect(() => {
-    const loaded = getContacts();
-    setContacts(loaded);
-    // Default Select All
-    setSelectedIds(new Set(loaded.map(c => c.id)));
-  }, []);
-
-  // --- Actions ---
+    const loadedContacts = getContacts();
+    setContacts(loadedContacts);
+    setQuickActions(getQuickActions());
+    setSelectedIds(new Set(loadedContacts.map(c => c.id)));
+  }, [showSettings]); // Reload when settings modal closes
 
   const handleAddContact = () => {
     if (!newName || !newKey) return;
     const newContact = saveContact(newName, newKey);
     setContacts(prev => [...prev, newContact]);
-    // Auto select new contact
     setSelectedIds(prev => new Set(prev).add(newContact.id));
-    
-    // Reset & Close
     setNewName('');
     setNewKey('');
     setShowAddModal(false);
   };
 
-  const handleDeleteContact = (id: string) => {
-    if (confirm('确定要删除这个联系人吗？')) {
+  const handleDeleteContact = (e: React.MouseEvent | React.TouchEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.confirm('确定要删除这位联系人吗？')) {
       const updated = deleteContact(id);
       setContacts(updated);
       setSelectedIds(prev => {
@@ -87,257 +61,176 @@ const App: React.FC = () => {
   };
 
   const toggleSelection = (id: string) => {
-    if (isEditMode) return; // Don't toggle selection in edit mode
-    
+    if (isEditMode) return;
     setSelectedIds(prev => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
 
-  const handleSelectAll = () => {
-    if (selectedIds.size === contacts.length) {
-      setSelectedIds(new Set()); // Deselect all
-    } else {
-      setSelectedIds(new Set(contacts.map(c => c.id))); // Select all
-    }
-  };
-
   const broadcast = async (msgContent: string) => {
     const targets = contacts.filter(c => selectedIds.has(c.id));
-
-    if (targets.length === 0) {
-      alert("请至少选择一个人！");
-      return;
-    }
+    if (targets.length === 0) return alert("请至少选择一个人！");
 
     setIsSending(true);
-
-    // Get my name for context
+    setSendSuccess(false);
     const myProfile = getMyProfile();
     const senderName = myProfile.name || '好友';
-    
-    // Encode Message
     const encodedMsg = encodeURIComponent(msgContent);
-    // Remove "via BuzzSync" suffix, only encode senderName
     const encodedTitle = encodeURIComponent(senderName);
     const icon = encodeURIComponent('https://api.iconify.design/lucide:zap.svg?color=%23ef4444');
 
-    // Fire requests in parallel
     const promises = targets.map(target => {
-      // Bark Format: https://api.day.app/{key}/{title}/{body}?icon=...
       const url = `${BARK_SERVER}/${target.barkKey}/${encodedTitle}/${encodedMsg}?icon=${icon}&group=BuzzSync`;
-      return fetch(url, { mode: 'no-cors' }) // no-cors is fine for Bark (fire & forget)
-        .catch(e => console.error(`Failed to send to ${target.name}`, e));
+      return fetch(url, { mode: 'no-cors' }).catch(e => console.error(e));
     });
 
-    await Promise.all(promises);
-
-    setIsSending(false);
-    setLastSentMessage(msgContent);
-    if (navigator.vibrate) navigator.vibrate([50, 50, 200]);
-    
-    // Reset status message after a few seconds
-    setTimeout(() => setLastSentMessage(null), 3000);
+    try {
+      await Promise.all(promises);
+      setSendSuccess(true);
+      setLastSentMessage(msgContent);
+      if (navigator.vibrate) navigator.vibrate([50, 50, 200]);
+    } finally {
+      setIsSending(false);
+      setTimeout(() => {
+        setSendSuccess(false);
+        setLastSentMessage(null);
+      }, 2500);
+    }
   };
 
-  const handleQuickAction = (action: typeof QUICK_ACTIONS[0]) => {
-    if (isSending) return;
-    // Pick random message
+  const handleQuickAction = (action: QuickActionConfig) => {
+    if (isSending || sendSuccess) return;
     const randomMsg = action.messages[Math.floor(Math.random() * action.messages.length)];
     broadcast(randomMsg);
   };
 
-  // --- Renders ---
-
   return (
     <>
-      {/* Main Container: Full viewport height, locked scroll */}
       <div className="h-full w-full bg-[#F2F2F7] flex flex-col max-w-md mx-auto overflow-hidden">
-        
-        {/* Header: Static at top of flex container */}
-        <header className="bg-white/90 backdrop-blur-md px-4 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] border-b border-gray-200 flex items-center justify-between shrink-0 z-10 shadow-sm">
+        <header className="bg-white/90 backdrop-blur-md px-4 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] border-b border-gray-200 flex items-center justify-between shrink-0 z-30 shadow-sm">
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <Zap className="w-6 h-6 text-blue-600 fill-current" />
-            BuzzSync
+            <Zap className="w-6 h-6 text-blue-600 fill-current" /> BuzzSync
           </h1>
-          <div className="flex gap-3">
-             <button 
-               onClick={() => setIsEditMode(!isEditMode)}
-               className={`text-sm font-medium ${isEditMode ? 'text-red-500' : 'text-gray-500'}`}
-             >
+          <div className="flex gap-4">
+             <button onClick={() => setIsEditMode(!isEditMode)} className={`text-[17px] font-medium ${isEditMode ? 'text-blue-600 font-bold' : 'text-gray-500'}`}>
                {isEditMode ? '完成' : '编辑'}
              </button>
-             <button onClick={() => setShowSettings(true)}>
-               <Settings className="w-6 h-6 text-gray-500" />
-             </button>
+             <button onClick={() => setShowSettings(true)}><Settings className="w-6 h-6 text-gray-500" /></button>
           </div>
         </header>
 
-        {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
           <div className="flex justify-between items-center mb-4">
-             <h2 className="text-gray-500 text-sm font-medium uppercase tracking-wider">
-               接收列表 ({selectedIds.size})
-             </h2>
-             <button onClick={handleSelectAll} className="text-blue-600 text-sm font-medium">
+             <h2 className="text-gray-500 text-xs font-bold uppercase tracking-widest">接收列表 ({selectedIds.size})</h2>
+             <button onClick={() => selectedIds.size === contacts.length ? setSelectedIds(new Set()) : setSelectedIds(new Set(contacts.map(c => c.id)))} className="text-blue-600 text-sm font-medium">
                {selectedIds.size === contacts.length ? '取消' : '全选'}
              </button>
           </div>
           
-          <div className="grid grid-cols-4 gap-4 pb-4">
-            {/* Add Button */}
-            <button 
-              onClick={() => setShowAddModal(true)}
-              className="aspect-square rounded-2xl bg-gray-200 flex flex-col items-center justify-center gap-1 active:scale-95 transition-all text-gray-500"
-            >
+          <div className="grid grid-cols-4 gap-x-4 gap-y-6 pb-4">
+            <button onClick={() => setShowAddModal(true)} className="aspect-square rounded-2xl bg-white border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-1 active:scale-95 transition-all text-gray-400">
               <Plus className="w-8 h-8" />
-              <span className="text-[10px] font-medium">添加</span>
+              <span className="text-[10px] font-bold uppercase">添加</span>
             </button>
 
-            {/* List */}
             {contacts.map(contact => {
               const isSelected = selectedIds.has(contact.id);
               return (
-                <div key={contact.id} className="relative flex flex-col items-center gap-1">
+                <div key={contact.id} className="relative flex flex-col items-center gap-1.5 group">
                   <button
                     onClick={() => toggleSelection(contact.id)}
                     className={`
-                      relative w-full aspect-square rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-sm transition-all
+                      relative w-full aspect-square rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-md transition-all duration-300
                       ${contact.avatarColor}
-                      ${isSelected ? 'ring-4 ring-blue-500/30 scale-105' : 'opacity-60 grayscale-[0.5] scale-95'}
+                      ${isSelected ? 'scale-105' : 'opacity-40 grayscale-[0.3] scale-90'}
+                      ${isEditMode ? 'animate-wiggle' : ''}
                     `}
                   >
                     {contact.name.charAt(0).toUpperCase()}
-                    
-                    {/* Selection Indicator */}
                     {isSelected && !isEditMode && (
-                      <div className="absolute -top-2 -right-2 bg-blue-600 rounded-full p-0.5 border-2 border-[#F2F2F7]">
-                        <CheckCircle2 className="w-4 h-4 text-white" />
+                      <div className="absolute -top-1.5 -right-1.5 bg-blue-600 rounded-full p-0.5 border-2 border-[#F2F2F7] shadow-sm">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                       </div>
                     )}
                   </button>
-                  <span className="text-[11px] font-medium text-gray-600 truncate w-full text-center">
-                    {contact.name}
-                  </span>
+                  <span className="text-[11px] font-bold text-gray-700 truncate w-full text-center">{contact.name}</span>
 
-                  {/* Delete Button (Edit Mode) */}
                   {isEditMode && (
                     <button 
-                      onClick={() => handleDeleteContact(contact.id)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md animate-bounce"
+                      onPointerDown={(e) => handleDeleteContact(e, contact.id)}
+                      className="absolute -top-2 -left-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg active:scale-75 z-[60] border-2 border-white pointer-events-auto"
+                      aria-label="Delete contact"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Minus className="w-5 h-5 stroke-[4px]" />
+                      <div className="absolute inset-[-10px] bg-transparent" /> {/* Hit area expansion */}
                     </button>
                   )}
                 </div>
               );
             })}
           </div>
-
-          {contacts.length === 0 && (
-             <div className="text-center mt-10 text-gray-400">
-                <UserPlus className="w-12 h-12 mx-auto mb-2 opacity-20" />
-                <p className="text-sm">暂无联系人<br/>请添加好友的 Bark Key</p>
-             </div>
-          )}
         </div>
 
-        {/* Footer: Quick Actions + Main Buzz */}
         <div className="bg-white border-t border-gray-200 p-4 pb-[calc(env(safe-area-inset-bottom)+20px)] shrink-0 shadow-[0_-5px_30px_rgba(0,0,0,0.05)] z-20">
-          
-          {/* Quick Action Grid */}
           <div className="grid grid-cols-4 gap-3 mb-4">
-            {QUICK_ACTIONS.map(action => {
-              const Icon = IconMap[action.iconName];
+            {quickActions.map(action => {
+              const Icon = IconMap[action.iconName] || Zap;
               return (
-                <button
-                  key={action.id}
-                  onClick={() => handleQuickAction(action)}
-                  disabled={isSending || selectedIds.size === 0}
-                  className={`
-                    flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all active:scale-90
-                    ${action.color} 
-                    ${isSending || selectedIds.size === 0 ? 'opacity-50 grayscale' : 'hover:brightness-95'}
-                  `}
+                <button 
+                  key={action.id} 
+                  onClick={() => handleQuickAction(action)} 
+                  disabled={isSending || sendSuccess || selectedIds.size === 0} 
+                  className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all active:scale-90 ${action.colorClass} ${isSending || sendSuccess || selectedIds.size === 0 ? 'opacity-30 grayscale' : 'hover:brightness-95'}`}
                 >
                   <Icon className="w-6 h-6" />
-                  <span className="text-[10px] font-semibold">{action.label}</span>
+                  <span className="text-[10px] font-bold truncate w-full text-center">{action.label}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Fallback Main Buzz Button */}
-          <Button 
-            fullWidth 
-            onClick={() => broadcast("紧急呼叫! ⚡️")}
-            disabled={isSending || selectedIds.size === 0}
-            className={`h-12 text-lg shadow-blue-300 shadow-lg ${isSending ? 'opacity-80' : ''}`}
-          >
+          <Button fullWidth onClick={() => broadcast("紧急呼叫! ⚡️")} disabled={isSending || sendSuccess || selectedIds.size === 0} className={`h-14 text-lg transition-all duration-300 relative overflow-hidden ${sendSuccess ? 'bg-green-500 hover:bg-green-500 shadow-green-200 scale-[1.02]' : 'shadow-blue-200'} ${isSending ? 'bg-blue-500' : ''}`}>
             {isSending ? (
-              <span className="animate-pulse">发送中...</span>
-            ) : lastSentMessage ? (
-              <span className="text-sm truncate">已发送: "{lastSentMessage}"</span>
+              <div className="flex items-center gap-3"><Loader2 className="w-6 h-6 animate-spin" /><span>发送中...</span><div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" /></div>
+            ) : sendSuccess ? (
+              <div className="flex items-center gap-2 animate-in zoom-in duration-300"><Check className="w-6 h-6" /><span>发送成功</span></div>
             ) : (
-              <div className="flex items-center gap-2">
-                <span>一键提醒</span>
-                <Zap className="w-5 h-5 fill-white" />
-              </div>
+              <div className="flex items-center gap-2"><span>一键提醒</span><Zap className="w-5 h-5 fill-white" /></div>
             )}
           </Button>
         </div>
-
       </div>
 
-      {/* Settings Modal (My Profile) */}
-      <SettingsModal 
-        isOpen={showSettings} 
-        onClose={() => setShowSettings(false)}
-        onSave={() => setShowSettings(false)}
-      />
+      <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} onSave={() => setShowSettings(false)} />
 
-      {/* Add Contact Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-6 animate-slideUp mb-[env(safe-area-inset-bottom)]">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">添加联系人</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-gray-400">
-                <X className="w-6 h-6" />
-              </button>
+          <div className="bg-[#F2F2F7] w-full max-w-sm rounded-t-[32px] sm:rounded-2xl p-6 animate-slideUp">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold">添加联系人</h3>
+              <button onClick={() => setShowAddModal(false)} className="bg-gray-200 p-1.5 rounded-full text-gray-500"><X className="w-5 h-5" /></button>
             </div>
-            
-            <div className="space-y-4">
-              <Input 
-                placeholder="昵称 (例如: 老张)" 
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                autoFocus
-              />
-              <div>
-                <Input 
-                  placeholder="Bark Key 或 链接" 
-                  value={newKey}
-                  onChange={(e) => setNewKey(e.target.value)}
-                  className="font-mono text-sm"
-                />
-                <p className="text-[10px] text-gray-400 mt-1 ml-1">
-                  请粘贴 Bark App 中的完整链接
-                </p>
-              </div>
-              <Button fullWidth onClick={handleAddContact} disabled={!newName || !newKey}>
-                保存
-              </Button>
+            <div className="space-y-6">
+              <Input placeholder="昵称 (老王)" value={newName} onChange={(e) => setNewName(e.target.value)} />
+              <Input placeholder="Bark Key 或 链接" value={newKey} onChange={(e) => setNewKey(e.target.value)} />
+              <Button fullWidth onClick={handleAddContact} disabled={!newName || !newKey}>保存联系人</Button>
             </div>
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes wiggle {
+          0%, 100% { transform: rotate(-1.5deg); }
+          50% { transform: rotate(1.5deg); }
+        }
+        .animate-wiggle { animation: wiggle 0.25s ease-in-out infinite; }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
+        .custom-scrollbar::-webkit-scrollbar { display: none; }
+      `}</style>
     </>
   );
 };

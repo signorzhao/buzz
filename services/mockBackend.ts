@@ -1,5 +1,5 @@
+
 import { Group, Notification, User } from "../types";
-import { COLORS } from "../constants";
 
 // In-memory store
 let groups: Group[] = [];
