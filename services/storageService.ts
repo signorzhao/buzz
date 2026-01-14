@@ -54,3 +54,36 @@ export const getQuickActions = (): QuickActionConfig[] => {
 export const saveQuickActions = (actions: QuickActionConfig[]) => {
   localStorage.setItem(ACTIONS_KEY, JSON.stringify(actions));
 };
+
+/**
+ * 方案 2: 导出完整配置为 JSON 字符串
+ */
+export const exportFullConfig = (): string => {
+  const config = {
+    contacts: getContacts(),
+    profile: getMyProfile(),
+    actions: getQuickActions(),
+    version: '1.0',
+    timestamp: Date.now()
+  };
+  return btoa(JSON.stringify(config)); // 使用 Base64 编码，方便用户复制
+};
+
+/**
+ * 方案 2: 从 JSON 字符串恢复配置
+ */
+export const importFullConfig = (base64Config: string): boolean => {
+  try {
+    const jsonStr = atob(base64Config);
+    const config = JSON.parse(jsonStr);
+    
+    if (config.contacts) localStorage.setItem(STORAGE_KEY, JSON.stringify(config.contacts));
+    if (config.profile) localStorage.setItem(MY_PROFILE_KEY, JSON.stringify(config.profile));
+    if (config.actions) localStorage.setItem(ACTIONS_KEY, JSON.stringify(config.actions));
+    
+    return true;
+  } catch (e) {
+    console.error("Import failed:", e);
+    return false;
+  }
+};
