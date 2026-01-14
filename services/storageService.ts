@@ -56,7 +56,7 @@ export const saveQuickActions = (actions: QuickActionConfig[]) => {
 };
 
 /**
- * 方案 2: 导出完整配置为 JSON 字符串
+ * 方案 2: 导出完整配置为 JSON 字符串 (UTF-8 安全)
  */
 export const exportFullConfig = (): string => {
   const config = {
@@ -66,15 +66,23 @@ export const exportFullConfig = (): string => {
     version: '1.0',
     timestamp: Date.now()
   };
-  return btoa(JSON.stringify(config)); // 使用 Base64 编码，方便用户复制
+  const jsonStr = JSON.stringify(config);
+  // Use a UTF-8 safe way to encode to Base64
+  return btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+    return String.fromCharCode(parseInt(p1, 16));
+  }));
 };
 
 /**
- * 方案 2: 从 JSON 字符串恢复配置
+ * 方案 2: 从 JSON 字符串恢复配置 (UTF-8 安全)
  */
 export const importFullConfig = (base64Config: string): boolean => {
   try {
-    const jsonStr = atob(base64Config);
+    // Use a UTF-8 safe way to decode from Base64
+    const jsonStr = decodeURIComponent(atob(base64Config).split('').map((c) => {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    
     const config = JSON.parse(jsonStr);
     
     if (config.contacts) localStorage.setItem(STORAGE_KEY, JSON.stringify(config.contacts));
