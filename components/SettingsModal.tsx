@@ -45,8 +45,15 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
     if (cleanKey.includes('api.day.app/')) {
        cleanKey = cleanKey.split('api.day.app/')[1].split('/')[0];
     }
+    
+    // 保存前清理话术中的空白行
+    const cleanedActions = actions.map(action => ({
+      ...action,
+      messages: action.messages.map(m => m.trim()).filter(m => m !== '')
+    }));
+
     saveMyProfile({ name, barkKey: cleanKey });
-    saveQuickActions(actions);
+    saveQuickActions(cleanedActions);
     onClose();
   };
 
@@ -81,7 +88,8 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
   };
 
   const updateActionMessages = (id: string, text: string) => {
-    const messageList = text.split('\n').filter(m => m.trim() !== '');
+    // 允许输入过程中的空行，不进行 filter 过滤
+    const messageList = text.split('\n');
     setActions(prev => prev.map(a => a.id === id ? { ...a, messages: messageList } : a));
   };
 
