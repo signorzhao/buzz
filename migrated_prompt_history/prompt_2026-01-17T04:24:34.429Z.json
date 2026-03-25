@@ -1,0 +1,543 @@
+[
+  {
+    "id": 0,
+    "author": "user",
+    "payload": {
+      "type": "text",
+      "text": "帮我设计改一下icon，放在iphone桌面当web应用，高清一些",
+      "files": [],
+      "fileUploads": [],
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768359176,
+      "nanos": 589000000
+    }
+  },
+  {
+    "id": 1,
+    "author": "model",
+    "payload": {
+      "type": "thinking",
+      "text": "**Defining the Visual Identity**\n\nI'm focused on evolving the BuzzSync icon into a sharper, native iOS look for home screens. The current iOS-inspired blue/zap theme is the foundation. It’s about achieving that high-definition, Web App feel.\n\n\n**Designing the iOS Icon**\n\nI'm now thinking about the technical implementation. Since I can't generate a binary `.png`, I will have to provide an SVG. This SVG will incorporate the gradient and bolt, so that I can update `index.html` with the correct `apple-touch-icon` links, and `manifest.json` for higher-quality icon definitions. Data URIs seem best for the icon definition.\n\n\n**Crafting the iOS Icon**\n\nI've been honing in on the details. I'm building out a \"pro\" SVG icon now. The design includes a linear gradient background, white lightning bolt, and subtle filters for drop shadows. I've also incorporated padding. The SVG will be created and referenced in the HTML and manifest.json. I've also created a `public/icon.svg` as a file reference.\n\n\n**Finalizing the Implementation**\n\nI'm now in the process of finalizing the implementation details. I'm updating `index.html` to reference the new icon for Apple devices and updating `manifest.json` to leverage its high-quality resolution. I'm also ensuring the user knows how to \"add to home screen\" to see the effect. I've refined the SVG design with a vibrant blue gradient, crisp white lightning bolt with an inner glow and drop shadow. I'm focusing on crafting the XML.\n\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768359176,
+      "nanos": 589000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768359186,
+      "nanos": 778000000
+    }
+  },
+  {
+    "id": 2,
+    "author": "model",
+    "payload": {
+      "type": "text",
+      "text": "为了提升 BuzzSync 在 iOS 桌面（PWA）上的视觉效果，我们需要设计一个符合 iOS 规范的高清图标。iOS 图标通常采用圆角矩形（系统会自动遮罩）、鲜艳的渐变色以及具有质感的符号。\n\n### 更新规范\n\n1.  **设计图标 (icon.svg)**：\n    *   **背景**：使用 iOS 经典的蓝紫色渐变（#3B82F6 到 #1D4ED8），增加深度感。\n    *   **符号**：中央放置白色的闪电（Zap）图标，添加微弱的阴影和外发光，使其具有“玻璃态”质感。\n    *   **比例**：确保符号在圆角矩形内有足够的留白（Safe Area），避免被系统遮罩切掉边缘。\n\n2.  **更新 HTML 头部**：\n    *   添加 `apple-touch-icon` 标签，这是 iOS 识别桌面图标的关键。\n    *   添加 `apple-mobile-web-app-status-bar-style` 为 `black-translucent` 以获得沉浸式体验。\n\n3.  **更新 Manifest**：\n    *   指向新的高清 SVG 图标。\n\n### 代码实现\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768359186,
+      "nanos": 778000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768359186,
+      "nanos": 778000000
+    }
+  },
+  {
+    "id": 3,
+    "author": "model",
+    "payload": {
+      "type": "generationTable",
+      "entries": [
+        {
+          "path": "icon.svg",
+          "generationType": 1,
+          "isDone": true,
+          "description": "创建一个高清的 iOS 风格应用图标",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "<svg width=\"512\" height=\"512\" viewBox=\"0 0 512 512\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <linearGradient id=\"paint0_linear\" x1=\"256\" y1=\"0\" x2=\"256\" y2=\"512\" gradientUnits=\"userSpaceOnUse\">\n      <stop stop-color=\"#3B82F6\"/>\n      <stop offset=\"1\" stop-color=\"#1D4ED8\"/>\n    </linearGradient>\n    <filter id=\"filter0_d\" x=\"120\" y=\"80\" width=\"280\" height=\"360\" filterUnits=\"userSpaceOnUse\" color-interpolation-filters=\"sRGB\">\n      <feFlood flood-opacity=\"0\" result=\"BackgroundImageFix\"/>\n      <feColorMatrix in=\"SourceAlpha\" type=\"matrix\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0\"/>\n      <feOffset dy=\"4\"/>\n      <feGaussianBlur stdDeviation=\"10\"/>\n      <feColorMatrix type=\"matrix\" values=\"0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0\"/>\n      <feBlend mode=\"normal\" in2=\"BackgroundImageFix\" result=\"effect1_dropShadow\"/>\n      <feBlend mode=\"normal\" in=\"SourceGraphic\" in2=\"effect1_dropShadow\" result=\"shape\"/>\n    </filter>\n  </defs>\n  <!-- Background with iOS Gradient -->\n  <rect width=\"512\" height=\"512\" rx=\"114\" fill=\"url(#paint0_linear)\"/>\n  \n  <!-- Glossy Overlay -->\n  <rect width=\"512\" height=\"512\" rx=\"114\" fill=\"white\" fill-opacity=\"0.05\"/>\n  \n  <!-- Zap Icon with Depth -->\n  <g filter=\"url(#filter0_d)\">\n    <path d=\"M362.667 213.333H277.333L320 64L149.333 298.667H234.667L192 448L362.667 213.333Z\" fill=\"white\" stroke=\"white\" stroke-width=\"12\" stroke-linejoin=\"round\"/>\n  </g>\n</svg>"
+            }
+          ]
+        },
+        {
+          "path": "index.html",
+          "generationType": 1,
+          "isDone": true,
+          "description": "添加 apple-touch-icon 引用以支持 iOS 桌面图标",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover\" />\n    \n    <!-- iOS Native App Style Config -->\n    <meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />\n    <meta name=\"apple-mobile-web-app-title\" content=\"BuzzSync\" />\n    <meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\" />\n    <meta name=\"format-detection\" content=\"telephone=no\" />\n    \n    <!-- iOS Home Screen Icon -->\n    <link rel=\"apple-touch-icon\" href=\"/icon.svg\" />\n    \n    <!-- PWA Manifest -->\n    <link rel=\"manifest\" href=\"/manifest.json\" />\n    \n    <title>BuzzSync</title>\n    <script src=\"https://cdn.tailwindcss.com\"></script>\n    <link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap\" rel=\"stylesheet\">\n    <style>\n      html, body {\n        margin: 0;\n        padding: 0;\n        width: 100%;\n        height: 100%;\n        position: fixed;\n        overflow: hidden;\n        background-color: #F2F2F7;\n        font-family: 'Inter', sans-serif;\n        -webkit-tap-highlight-color: transparent;\n      }\n      ::-webkit-scrollbar {\n        width: 0px;\n        background: transparent;\n      }\n      #root {\n        height: 100%;\n        width: 100%;\n      }\n    </style>\n  <script type=\"importmap\">\n{\n  \"imports\": {\n    \"react\": \"https://esm.sh/react@^19.2.3\",\n    \"react-dom/\": \"https://esm.sh/react-dom@^19.2.3/\",\n    \"react/\": \"https://esm.sh/react@^19.2.3/\",\n    \"@google/genai\": \"https://esm.sh/@google/genai@^1.35.0\",\n    \"lucide-react\": \"https://esm.sh/lucide-react@^0.562.0\",\n    \"@supabase/supabase-js\": \"https://esm.sh/@supabase/supabase-js@^2.90.1\",\n    \"qrcode\": \"https://esm.sh/qrcode@^1.5.4\",\n    \"vite\": \"https://esm.sh/vite@^7.3.1\",\n    \"@vitejs/plugin-react\": \"https://esm.sh/@vitejs/plugin-react@^5.1.2\"\n  }\n}\n</script>\n</head>\n  <body>\n    <div id=\"root\"></div>\n    <script type=\"module\" src=\"./index.tsx\"></script>\n  </body>\n</html>"
+            }
+          ]
+        },
+        {
+          "path": "public/manifest.json",
+          "generationType": 1,
+          "isDone": true,
+          "description": "更新 manifest 以指向新的高清 SVG 图标",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "{\n  \"name\": \"BuzzSync Group Alerts\",\n  \"short_name\": \"BuzzSync\",\n  \"start_url\": \"/\",\n  \"display\": \"standalone\",\n  \"background_color\": \"#F2F2F7\",\n  \"theme_color\": \"#2563eb\",\n  \"orientation\": \"portrait\",\n  \"icons\": [\n    {\n      \"src\": \"/icon.svg\",\n      \"sizes\": \"any\",\n      \"type\": \"image/svg+xml\",\n      \"purpose\": \"any\"\n    },\n    {\n      \"src\": \"/icon.svg\",\n      \"sizes\": \"192x192\",\n      \"type\": \"image/svg+xml\"\n    },\n    {\n      \"src\": \"/icon.svg\",\n      \"sizes\": \"512x512\",\n      \"type\": \"image/svg+xml\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    "createdTimestamp": {
+      "seconds": 1768359188,
+      "nanos": 108000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768359191,
+      "nanos": 895000000
+    }
+  },
+  {
+    "id": 4,
+    "author": "user",
+    "payload": {
+      "type": "text",
+      "text": "现在如果我有版本更新的话，就会出现用户都需要全部新添加才行，这样很麻烦，有几个方案，你看哪个可行\n1.现在有的用户的数据，联系人列表内容可以导出和导入一个配置文件\n2.可以把用户数据，联系人列表内容在软件里用文本形式体现，方便保存和快速恢复配置\n3.将用户数据，联系人列表内容保存在本地\n我更倾向于用方案2，你可以说说你的想法，另外现在的联系人列表是如何保存的？",
+      "files": [],
+      "fileUploads": [],
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768390332,
+      "nanos": 599000000
+    }
+  },
+  {
+    "id": 5,
+    "author": "model",
+    "payload": {
+      "type": "thinking",
+      "text": "**Examining Data Persistence**\n\nI'm currently looking at the problem of data loss during app updates. Local storage is proving problematic, as it risks data erasure if the user clears their browser cache. My priority is finding a more robust solution that survives updates and user-initiated data purges. I'm exploring alternatives to guarantee data persistence.\n\n\n**Prioritizing Backup Strategies**\n\nI've been evaluating the export/import options for BuzzSync data persistence. It's becoming clearer that the text-based export/import method, essentially JSON, offers a simple yet reliable solution for the user's contacts. It's easily implemented and very robust for the target user base. I am now confirming that this method is best for the situation at hand.\n\n\n**Finalizing Implementation Details**\n\nI'm now integrating the backup/restore features into the settings modal. This involves creating the JSON export/import functions in `storageService.ts` and building the corresponding UI components in `SettingsModal.tsx`. The goal is to provide a user-friendly way to copy their data to a text format, and then paste it back to restore it later.\n\n\n**Defining User Experience Flow**\n\nI'm working on the design for the backup/restore feature now. The UI will have a dedicated card section within the settings modal, positioned below existing profile settings. There'll be a text area for the exported JSON data, along with \"Copy\" and \"Import\" buttons. Success/failure messages will appear using iOS-style alerts. This setup should make data persistence straightforward for our users. I believe this will be a good user flow.\n\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768390332,
+      "nanos": 599000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768390354,
+      "nanos": 299000000
+    }
+  },
+  {
+    "id": 6,
+    "author": "model",
+    "payload": {
+      "type": "text",
+      "text": "这是一个非常实际的需求。针对你的问题，我先回答你的疑问，再针对你的首选方案进行开发。\n\n### 1. 现在的联系人列表是如何保存的？\n目前的联系人列表保存在浏览器的 **`localStorage`** 中。\n*   **优点**：简单、自动保存、刷新页面不会丢失。\n*   **缺点**：它是绑定在“域名”和“浏览器”上的。如果用户更换了浏览器、清除了浏览器缓存、或者你更换了访问的 URL，数据就会丢失。\n\n### 2. 方案评估\n*   **方案 1 (导出文件)**：专业但不直观，iOS 上操作文件系统对普通用户有一定门槛。\n*   **方案 2 (文本形式 - 你的首选)**：**非常可行且高效**。用户可以像复制一段微信消息一样，把配置保存到“备忘录”或发给自己的微信。恢复时只要粘贴回来即可。\n*   **方案 3 (保存在本地)**：目前已经在做，但如前所述，它不够持久且无法跨设备。\n\n### 3. 开发规范与实现\n我将为你实现一个 **“配置备份与恢复”** 功能。\n\n**更新细节：**\n1.  **功能行为**：在设置页面增加一个“备份与恢复”区域。\n    *   **备份**：将所有联系人和自定义设置打包成一段特殊的 JSON 字符串。\n    *   **复制**：一键复制这段文本。\n    *   **导入**：粘贴文本并校验格式，点击后立即恢复所有数据并刷新列表。\n2.  **视觉设计**：\n    *   在 `SettingsModal` 中增加一个卡片区块。\n    *   使用类似 iOS 系统“关于本机”里的文本块样式。\n    *   增加一个带动画的“复制成功”提示。\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768390354,
+      "nanos": 299000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768390354,
+      "nanos": 334000000
+    }
+  },
+  {
+    "id": 7,
+    "author": "model",
+    "payload": {
+      "type": "generationTable",
+      "entries": [
+        {
+          "path": "services/storageService.ts",
+          "generationType": 1,
+          "isDone": true,
+          "description": "添加导出和导入完整配置的函数",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "import { Contact, QuickActionConfig, UserProfile } from \"../types\";\nimport { AVATAR_COLORS, DEFAULT_QUICK_ACTIONS } from \"../constants\";\n\nconst STORAGE_KEY = 'buzzsync_contacts';\nconst MY_PROFILE_KEY = 'buzzsync_my_profile';\nconst ACTIONS_KEY = 'buzzsync_quick_actions';\n\nexport const getContacts = (): Contact[] => {\n  const data = localStorage.getItem(STORAGE_KEY);\n  return data ? JSON.parse(data) : [];\n};\n\nexport const saveContact = (name: string, barkUrlOrKey: string): Contact => {\n  const contacts = getContacts();\n  let key = barkUrlOrKey.trim();\n  if (key.includes('api.day.app/')) {\n    const parts = key.split('api.day.app/');\n    if (parts[1]) key = parts[1].split('/')[0];\n  }\n\n  const newContact: Contact = {\n    id: crypto.randomUUID(),\n    name: name.trim(),\n    barkKey: key,\n    avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],\n  };\n\n  const updated = [...contacts, newContact];\n  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));\n  return newContact;\n};\n\nexport const deleteContact = (id: string) => {\n  const contacts = getContacts();\n  const updated = contacts.filter(c => c.id !== id);\n  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));\n  return updated;\n};\n\nexport const getMyProfile = (): UserProfile => {\n  const data = localStorage.getItem(MY_PROFILE_KEY);\n  return data ? JSON.parse(data) : { name: '', barkKey: '' };\n};\n\nexport const saveMyProfile = (profile: UserProfile) => {\n  localStorage.setItem(MY_PROFILE_KEY, JSON.stringify(profile));\n};\n\nexport const getQuickActions = (): QuickActionConfig[] => {\n  const data = localStorage.getItem(ACTIONS_KEY);\n  return data ? JSON.parse(data) : DEFAULT_QUICK_ACTIONS;\n};\n\nexport const saveQuickActions = (actions: QuickActionConfig[]) => {\n  localStorage.setItem(ACTIONS_KEY, JSON.stringify(actions));\n};\n\n/**\n * 方案 2: 导出完整配置为 JSON 字符串\n */\nexport const exportFullConfig = (): string => {\n  const config = {\n    contacts: getContacts(),\n    profile: getMyProfile(),\n    actions: getQuickActions(),\n    version: '1.0',\n    timestamp: Date.now()\n  };\n  return btoa(JSON.stringify(config)); // 使用 Base64 编码，方便用户复制\n};\n\n/**\n * 方案 2: 从 JSON 字符串恢复配置\n */\nexport const importFullConfig = (base64Config: string): boolean => {\n  try {\n    const jsonStr = atob(base64Config);\n    const config = JSON.parse(jsonStr);\n    \n    if (config.contacts) localStorage.setItem(STORAGE_KEY, JSON.stringify(config.contacts));\n    if (config.profile) localStorage.setItem(MY_PROFILE_KEY, JSON.stringify(config.profile));\n    if (config.actions) localStorage.setItem(ACTIONS_KEY, JSON.stringify(config.actions));\n    \n    return true;\n  } catch (e) {\n    console.error(\"Import failed:\", e);\n    return false;\n  }\n};"
+            }
+          ]
+        },
+        {
+          "path": "components/SettingsModal.tsx",
+          "generationType": 1,
+          "isDone": true,
+          "description": "在设置中添加备份与恢复功能，支持文本导入导出",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "import React, { useState, useEffect } from 'react';\nimport { Button } from './Button';\nimport { Input } from './Input';\nimport { X, ChevronRight, Palette, Copy, Download, Upload, RefreshCw, CheckCircle2 } from 'lucide-react';\nimport { \n  getMyProfile, \n  saveMyProfile, \n  getQuickActions, \n  saveQuickActions, \n  exportFullConfig, \n  importFullConfig \n} from '../services/storageService';\nimport { ACTION_LIGHT_COLORS } from '../constants';\nimport { QuickActionConfig } from '../types';\n\ninterface Props {\n  isOpen: boolean;\n  onClose: () => void;\n  onSave: () => void;\n}\n\nexport const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {\n  const [name, setName] = useState('');\n  const [barkKey, setBarkKey] = useState('');\n  const [actions, setActions] = useState<QuickActionConfig[]>([]);\n  const [importText, setImportText] = useState('');\n  const [copied, setCopied] = useState(false);\n  const [importError, setImportError] = useState(false);\n  const [importSuccess, setImportSuccess] = useState(false);\n\n  useEffect(() => {\n    if (isOpen) {\n      const profile = getMyProfile();\n      setName(profile.name);\n      setBarkKey(profile.barkKey);\n      setActions(getQuickActions());\n      setImportError(false);\n      setImportSuccess(false);\n    }\n  }, [isOpen]);\n\n  const handleSave = () => {\n    let cleanKey = barkKey.trim();\n    if (cleanKey.includes('api.day.app/')) {\n       cleanKey = cleanKey.split('api.day.app/')[1].split('/')[0];\n    }\n    saveMyProfile({ name, barkKey: cleanKey });\n    saveQuickActions(actions);\n    onClose();\n  };\n\n  const handleCopyConfig = () => {\n    const config = exportFullConfig();\n    navigator.clipboard.writeText(config);\n    setCopied(true);\n    setTimeout(() => setCopied(false), 2000);\n  };\n\n  const handleImportConfig = () => {\n    if (!importText.trim()) return;\n    const success = importFullConfig(importText.trim());\n    if (success) {\n      setImportSuccess(true);\n      setImportError(false);\n      setTimeout(() => {\n        window.location.reload(); // 刷新页面以加载新配置\n      }, 1000);\n    } else {\n      setImportError(true);\n      setImportSuccess(false);\n    }\n  };\n\n  const updateActionColor = (id: string, colorClass: string) => {\n    setActions(prev => prev.map(a => a.id === id ? { ...a, colorClass } : a));\n  };\n\n  const updateActionLabel = (id: string, label: string) => {\n    setActions(prev => prev.map(a => a.id === id ? { ...a, label } : a));\n  };\n\n  if (!isOpen) return null;\n\n  return (\n    <div className=\"fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4\">\n      <div className=\"bg-[#F2F2F7] w-full max-w-md rounded-t-[32px] sm:rounded-[32px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar\">\n        <div className=\"flex justify-between items-center mb-6 sticky top-0 bg-[#F2F2F7] z-10 py-2\">\n          <h3 className=\"text-2xl font-bold\">设置</h3>\n          <button onClick={onClose} className=\"bg-gray-200 p-2 rounded-full text-gray-500\">\n            <X className=\"w-6 h-6\" />\n          </button>\n        </div>\n\n        <div className=\"space-y-8 pb-10\">\n          <section className=\"space-y-4\">\n            <h4 className=\"text-xs font-bold text-gray-400 uppercase tracking-widest ml-1\">个人信息</h4>\n            <div className=\"bg-white rounded-2xl overflow-hidden shadow-sm\">\n              <div className=\"p-4 border-b border-gray-100\">\n                <Input label=\"我的昵称\" placeholder=\"输入名字\" value={name} onChange={(e) => setName(e.target.value)} />\n              </div>\n              <div className=\"p-4\">\n                <Input label=\"我的 Bark Key\" placeholder=\"粘贴 Key\" value={barkKey} onChange={(e) => setBarkKey(e.target.value)} className=\"font-mono text-sm\" />\n              </div>\n            </div>\n          </section>\n\n          <section className=\"space-y-4\">\n            <h4 className=\"text-xs font-bold text-gray-400 uppercase tracking-widest ml-1\">自定义按钮背景颜色</h4>\n            <div className=\"bg-white rounded-2xl overflow-hidden shadow-sm divide-y divide-gray-50\">\n              {actions.map((action) => (\n                <div key={action.id} className=\"p-4\">\n                  <div className=\"flex items-center justify-between mb-3\">\n                    <div className=\"flex items-center gap-3\">\n                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${action.colorClass}`}>\n                         <Palette className=\"w-5 h-5\" />\n                       </div>\n                       <input \n                         className=\"font-bold text-gray-800 outline-none w-32 border-b border-transparent focus:border-blue-500\"\n                         value={action.label}\n                         onChange={(e) => updateActionLabel(action.id, e.target.value)}\n                       />\n                    </div>\n                    <span className=\"text-xs text-gray-400\">点击下方选色</span>\n                  </div>\n                  \n                  <div className=\"flex gap-2 overflow-x-auto no-scrollbar py-1\">\n                    {ACTION_LIGHT_COLORS.map(color => (\n                      <button\n                        key={color.id}\n                        onClick={() => updateActionColor(action.id, color.class)}\n                        className={`w-8 h-8 rounded-full shrink-0 border-2 transition-all ${color.class.split(' ')[0]} ${action.colorClass.includes(color.class.split(' ')[0]) ? 'border-blue-500 scale-110 shadow-md' : 'border-transparent opacity-60'}`}\n                      />\n                    ))}\n                  </div>\n                </div>\n              ))}\n            </div>\n          </section>\n\n          {/* 方案 2: 备份与恢复 */}\n          <section className=\"space-y-4\">\n            <h4 className=\"text-xs font-bold text-gray-400 uppercase tracking-widest ml-1\">数据备份与恢复</h4>\n            <div className=\"bg-white rounded-2xl p-4 shadow-sm space-y-4\">\n              <div>\n                <p className=\"text-sm text-gray-500 mb-3\">\n                  你可以将当前的联系人和设置备份为一段代码，保存到备忘录。下次使用时粘贴回来即可恢复。\n                </p>\n                <Button variant=\"secondary\" fullWidth onClick={handleCopyConfig} className=\"gap-2\">\n                  {copied ? <CheckCircle2 className=\"w-5 h-5 text-green-500\" /> : <Copy className=\"w-5 h-5\" />}\n                  {copied ? '已复制备份代码' : '生成并复制备份代码'}\n                </Button>\n              </div>\n              \n              <div className=\"pt-4 border-t border-gray-100\">\n                <textarea\n                  className={`w-full bg-gray-50 rounded-xl p-3 text-xs font-mono border-2 transition-colors outline-none h-24 ${importError ? 'border-red-300' : 'border-transparent focus:border-blue-500'}`}\n                  placeholder=\"在此粘贴备份代码以进行恢复...\"\n                  value={importText}\n                  onChange={(e) => setImportText(e.target.value)}\n                />\n                {importError && <p className=\"text-xs text-red-500 mt-1 ml-1\">代码无效，请检查是否完整粘贴</p>}\n                {importSuccess && <p className=\"text-xs text-green-500 mt-1 ml-1 flex items-center gap-1\"><RefreshCw className=\"w-3 h-3 animate-spin\" /> 恢复成功，正在刷新页面...</p>}\n                <Button \n                  variant=\"primary\" \n                  fullWidth \n                  onClick={handleImportConfig} \n                  disabled={!importText.trim() || importSuccess}\n                  className=\"mt-3 bg-gray-800 hover:bg-black\"\n                >\n                  <Upload className=\"w-5 h-5\" />\n                  导入并恢复配置\n                </Button>\n              </div>\n            </div>\n          </section>\n\n          <Button fullWidth onClick={handleSave} className=\"h-14\">完成并保存</Button>\n        </div>\n      </div>\n    </div>\n  );\n};"
+            }
+          ]
+        }
+      ]
+    },
+    "createdTimestamp": {
+      "seconds": 1768390356,
+      "nanos": 708000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768390361,
+      "nanos": 157000000
+    }
+  },
+  {
+    "id": 8,
+    "author": "model",
+    "payload": {
+      "type": "text",
+      "text": "\n\n我已经为你完成了 Plan 2 的实现。现在用户可以在“设置”中看到一个新的 **“数据备份与恢复”** 模块。\n\n### 功能说明：\n1.  **备份代码**：点击“生成并复制备份代码”按钮，它会将你所有的联系人、名字、Bark Key 以及自定义的按钮颜色全部打包成一串 **Base64 字符串**（类似 `eyJjb250YWN0cyI6W...`）。\n2.  **安全性与便捷性**：Base64 编码的好处是文本不会因为换行或特殊字符导致损坏，非常适合在微信或 iOS 备忘录中传输。\n3.  **恢复配置**：用户只需将这段长字符串粘贴到文本框，点击“导入并恢复配置”，App 会自动识别、覆盖本地数据并刷新页面。\n\n这样即使你发布了新版本，用户只需要花几秒钟“复制-粘贴”，就能瞬间找回所有的联系人。",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768390373,
+      "nanos": 155000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768390373,
+      "nanos": 298000000
+    }
+  },
+  {
+    "id": 9,
+    "author": "user",
+    "payload": {
+      "type": "text",
+      "text": "另外，每个按钮随机说哪些话是保存在哪个文件里的？我想自己去修改它",
+      "files": [],
+      "fileUploads": [],
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768390764,
+      "nanos": 43000000
+    }
+  },
+  {
+    "id": 10,
+    "author": "model",
+    "payload": {
+      "type": "thinking",
+      "text": "**Locating Default Messages**\n\nI've pinpointed the location of the default QuickAction messages. They are defined within `constants.ts`, specifically under `DEFAULT_QUICK_ACTIONS`. Each object in this array corresponds to a button, and the messages are stored within them.\n\n\n**Improving Message Customization**\n\nI'm now focusing on the user's need for easy message customization. I've realized the existing setup in `constants.ts` is the starting point. But, I plan to enhance the `SettingsModal` in `SettingsModal.tsx` to allow editing the `messages` array directly. This aligns with the user's desire for easy configuration, beyond just the label and color. Currently, `storageService.ts` loads messages from `localStorage` but defaults to `DEFAULT_QUICK_ACTIONS` from the specified constant file.\n\n\n**Refining UI & Storage**\n\nI've decided to refine the UI within `SettingsModal.tsx` by expanding each quick action row to include a dedicated message editing section. I will likely use a simple text area where each line represents a message. I'm also ensuring that users are clearly informed that `constants.ts` defines the initial defaults, and that I need to explain *where* these messages are saved in storage.\n\n\n**Describing Message Locations**\n\nI'm solidifying the storage strategy for messages. The definitive default is maintained in `constants.ts` for version control and initial setup. After user-driven changes or config imports, `localStorage` steps in via `storageService.ts`. I'll introduce a \"Manage Messages\" section to the settings modal to enhance usability and professionalism. This includes the implementation of a dedicated message editor in `SettingsModal.tsx`.\n\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768390764,
+      "nanos": 43000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768390771,
+      "nanos": 194000000
+    }
+  },
+  {
+    "id": 11,
+    "author": "model",
+    "payload": {
+      "type": "text",
+      "text": "这些随机发送的话（消息列表）保存在 **`constants.ts`** 文件的 **`DEFAULT_QUICK_ACTIONS`** 数组中。\n\n### 1. 修改代码文件（硬编码方式）\n如果你想直接在代码里修改这些话，请编辑 **`constants.ts`**：\n找到对应的 `id`（例如 `id: '1'` 是续命咖啡），修改其 `messages` 数组中的内容即可。\n\n### 2. 功能增强：在 App 内直接修改（UI 方式）\n为了让你更方便地调整，我决定更新 **`SettingsModal.tsx`**，在设置界面直接增加“编辑消息”的功能。这样你就不需要每次都动代码，直接在手机上就能增删改这些话。\n\n#### 更新规范：\n1.  **UI 行为**：在设置页面的“自定义按钮”部分，点击每个按钮对应的颜色/名称区域时，展开一个消息编辑区。\n2.  **交互设计**：\n    *   使用文本域（Textarea）展示消息，每行代表一条随机消息。\n    *   用户修改后点击保存，会同步更新到 `localStorage` 和你的备份代码中。\n3.  **视觉效果**：保持 iOS 风格，使用清晰的标签和圆角输入框。\n\n以下是代码更新：\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768390771,
+      "nanos": 194000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768390771,
+      "nanos": 251000000
+    }
+  },
+  {
+    "id": 12,
+    "author": "model",
+    "payload": {
+      "type": "generationTable",
+      "entries": [
+        {
+          "path": "components/SettingsModal.tsx",
+          "generationType": 1,
+          "isDone": true,
+          "description": "在设置界面增加编辑每个快速操作随机消息的功能",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "import React, { useState, useEffect } from 'react';\nimport { Button } from './Button';\nimport { Input } from './Input';\nimport { X, ChevronRight, Palette, Copy, Download, Upload, RefreshCw, CheckCircle2, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';\nimport { \n  getMyProfile, \n  saveMyProfile, \n  getQuickActions, \n  saveQuickActions, \n  exportFullConfig, \n  importFullConfig \n} from '../services/storageService';\nimport { ACTION_LIGHT_COLORS } from '../constants';\nimport { QuickActionConfig } from '../types';\n\ninterface Props {\n  isOpen: boolean;\n  onClose: () => void;\n  onSave: () => void;\n}\n\nexport const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {\n  const [name, setName] = useState('');\n  const [barkKey, setBarkKey] = useState('');\n  const [actions, setActions] = useState<QuickActionConfig[]>([]);\n  const [importText, setImportText] = useState('');\n  const [copied, setCopied] = useState(false);\n  const [importError, setImportError] = useState(false);\n  const [importSuccess, setImportSuccess] = useState(false);\n  const [expandedActionId, setExpandedActionId] = useState<string | null>(null);\n\n  useEffect(() => {\n    if (isOpen) {\n      const profile = getMyProfile();\n      setName(profile.name);\n      setBarkKey(profile.barkKey);\n      setActions(getQuickActions());\n      setImportError(false);\n      setImportSuccess(false);\n    }\n  }, [isOpen]);\n\n  const handleSave = () => {\n    let cleanKey = barkKey.trim();\n    if (cleanKey.includes('api.day.app/')) {\n       cleanKey = cleanKey.split('api.day.app/')[1].split('/')[0];\n    }\n    saveMyProfile({ name, barkKey: cleanKey });\n    saveQuickActions(actions);\n    onClose();\n  };\n\n  const handleCopyConfig = () => {\n    const config = exportFullConfig();\n    navigator.clipboard.writeText(config);\n    setCopied(true);\n    setTimeout(() => setCopied(false), 2000);\n  };\n\n  const handleImportConfig = () => {\n    if (!importText.trim()) return;\n    const success = importFullConfig(importText.trim());\n    if (success) {\n      setImportSuccess(true);\n      setImportError(false);\n      setTimeout(() => {\n        window.location.reload(); // 刷新页面以加载新配置\n      }, 1000);\n    } else {\n      setImportError(true);\n      setImportSuccess(false);\n    }\n  };\n\n  const updateActionColor = (id: string, colorClass: string) => {\n    setActions(prev => prev.map(a => a.id === id ? { ...a, colorClass } : a));\n  };\n\n  const updateActionLabel = (id: string, label: string) => {\n    setActions(prev => prev.map(a => a.id === id ? { ...a, label } : a));\n  };\n\n  const updateActionMessages = (id: string, text: string) => {\n    const messageList = text.split('\\n').filter(m => m.trim() !== '');\n    setActions(prev => prev.map(a => a.id === id ? { ...a, messages: messageList } : a));\n  };\n\n  if (!isOpen) return null;\n\n  return (\n    <div className=\"fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4\">\n      <div className=\"bg-[#F2F2F7] w-full max-w-md rounded-t-[32px] sm:rounded-[32px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar\">\n        <div className=\"flex justify-between items-center mb-6 sticky top-0 bg-[#F2F2F7] z-10 py-2\">\n          <h3 className=\"text-2xl font-bold\">设置</h3>\n          <button onClick={onClose} className=\"bg-gray-200 p-2 rounded-full text-gray-500\">\n            <X className=\"w-6 h-6\" />\n          </button>\n        </div>\n\n        <div className=\"space-y-8 pb-10\">\n          <section className=\"space-y-4\">\n            <h4 className=\"text-xs font-bold text-gray-400 uppercase tracking-widest ml-1\">个人信息</h4>\n            <div className=\"bg-white rounded-2xl overflow-hidden shadow-sm\">\n              <div className=\"p-4 border-b border-gray-100\">\n                <Input label=\"我的昵称\" placeholder=\"输入名字\" value={name} onChange={(e) => setName(e.target.value)} />\n              </div>\n              <div className=\"p-4\">\n                <Input label=\"我的 Bark Key\" placeholder=\"粘贴 Key\" value={barkKey} onChange={(e) => setBarkKey(e.target.value)} className=\"font-mono text-sm\" />\n              </div>\n            </div>\n          </section>\n\n          <section className=\"space-y-4\">\n            <h4 className=\"text-xs font-bold text-gray-400 uppercase tracking-widest ml-1\">自定义按钮与话术</h4>\n            <div className=\"bg-white rounded-2xl overflow-hidden shadow-sm divide-y divide-gray-50\">\n              {actions.map((action) => (\n                <div key={action.id} className=\"p-4\">\n                  <div className=\"flex items-center justify-between mb-3\">\n                    <div className=\"flex items-center gap-3\">\n                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${action.colorClass}`}>\n                         <Palette className=\"w-5 h-5\" />\n                       </div>\n                       <input \n                         className=\"font-bold text-gray-800 outline-none w-32 border-b border-transparent focus:border-blue-500\"\n                         value={action.label}\n                         onChange={(e) => updateActionLabel(action.id, e.target.value)}\n                       />\n                    </div>\n                    <button \n                      onClick={() => setExpandedActionId(expandedActionId === action.id ? null : action.id)}\n                      className=\"text-blue-600 p-1 rounded-full hover:bg-blue-50 transition-colors\"\n                    >\n                      {expandedActionId === action.id ? <ChevronUp className=\"w-5 h-5\" /> : <div className=\"flex items-center gap-1 text-xs font-medium\"><MessageSquare className=\"w-4 h-4\" />编辑话术</div>}\n                    </button>\n                  </div>\n                  \n                  {expandedActionId === action.id && (\n                    <div className=\"mt-3 mb-4 animate-in slide-in-from-top-2 duration-200\">\n                      <label className=\"text-[11px] font-bold text-gray-400 uppercase mb-2 block ml-1\">随机话术 (每行一句)</label>\n                      <textarea \n                        className=\"w-full bg-gray-50 rounded-xl p-3 text-sm border-none ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 outline-none h-28 resize-none\"\n                        value={action.messages.join('\\n')}\n                        onChange={(e) => updateActionMessages(action.id, e.target.value)}\n                        placeholder=\"每行输入一句随机话术...\"\n                      />\n                    </div>\n                  )}\n\n                  <div className=\"flex gap-2 overflow-x-auto no-scrollbar py-1\">\n                    {ACTION_LIGHT_COLORS.map(color => (\n                      <button\n                        key={color.id}\n                        onClick={() => updateActionColor(action.id, color.class)}\n                        className={`w-8 h-8 rounded-full shrink-0 border-2 transition-all ${color.class.split(' ')[0]} ${action.colorClass.includes(color.class.split(' ')[0]) ? 'border-blue-500 scale-110 shadow-md' : 'border-transparent opacity-60'}`}\n                      />\n                    ))}\n                  </div>\n                </div>\n              ))}\n            </div>\n          </section>\n\n          <section className=\"space-y-4\">\n            <h4 className=\"text-xs font-bold text-gray-400 uppercase tracking-widest ml-1\">数据备份与恢复</h4>\n            <div className=\"bg-white rounded-2xl p-4 shadow-sm space-y-4\">\n              <div>\n                <p className=\"text-sm text-gray-500 mb-3\">\n                  可以将当前的联系人、自定义颜色及<b>随机话术</b>备份为一段代码。\n                </p>\n                <Button variant=\"secondary\" fullWidth onClick={handleCopyConfig} className=\"gap-2\">\n                  {copied ? <CheckCircle2 className=\"w-5 h-5 text-green-500\" /> : <Copy className=\"w-5 h-5\" />}\n                  {copied ? '已复制备份代码' : '生成并复制备份代码'}\n                </Button>\n              </div>\n              \n              <div className=\"pt-4 border-t border-gray-100\">\n                <textarea\n                  className={`w-full bg-gray-50 rounded-xl p-3 text-xs font-mono border-2 transition-colors outline-none h-24 ${importError ? 'border-red-300' : 'border-transparent focus:border-blue-500'}`}\n                  placeholder=\"在此粘贴备份代码以进行恢复...\"\n                  value={importText}\n                  onChange={(e) => setImportText(e.target.value)}\n                />\n                {importError && <p className=\"text-xs text-red-500 mt-1 ml-1\">代码无效，请检查是否完整粘贴</p>}\n                {importSuccess && <p className=\"text-xs text-green-500 mt-1 ml-1 flex items-center gap-1\"><RefreshCw className=\"w-3 h-3 animate-spin\" /> 恢复成功，正在刷新页面...</p>}\n                <Button \n                  variant=\"primary\" \n                  fullWidth \n                  onClick={handleImportConfig} \n                  disabled={!importText.trim() || importSuccess}\n                  className=\"mt-3 bg-gray-800 hover:bg-black\"\n                >\n                  <Upload className=\"w-5 h-5\" />\n                  导入并恢复配置\n                </Button>\n              </div>\n            </div>\n          </section>\n\n          <Button fullWidth onClick={handleSave} className=\"h-14\">完成并保存</Button>\n        </div>\n      </div>\n    </div>\n  );\n};"
+            }
+          ]
+        }
+      ]
+    },
+    "createdTimestamp": {
+      "seconds": 1768390772,
+      "nanos": 803000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768390800,
+      "nanos": 130000000
+    }
+  },
+  {
+    "id": 13,
+    "author": "model",
+    "payload": {
+      "type": "text",
+      "text": "\n\n### 总结\n1.  **文件路径**：初始默认内容在 `constants.ts` 的 `DEFAULT_QUICK_ACTIONS` 中。\n2.  **新功能**：我更新了设置页面，你现在可以直接在 App 里点击按钮旁边的 **“编辑话术”**，按回车分行输入你想说的话。\n3.  **持久化**：你在这里改的话会保存到 `localStorage` 中，并且在你生成的“备份代码”中也会包含这些自定义话术。这样下次版本更新，只要导入备份，你改过的话也会一起回来。",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768390800,
+      "nanos": 130000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768390800,
+      "nanos": 154000000
+    }
+  },
+  {
+    "id": 14,
+    "author": "user",
+    "payload": {
+      "type": "text",
+      "text": "Fix the following errors:\n\n```\nInvalidCharacterError: The string contains invalid characters.\n```\n```\nImport failed:\nThe string contains invalid characters.\n```",
+      "files": [],
+      "fileUploads": [],
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768392012,
+      "nanos": 974000000
+    }
+  },
+  {
+    "id": 15,
+    "author": "model",
+    "payload": {
+      "type": "thinking",
+      "text": "**Addressing the Encoding Error**\n\nI'm currently trying to pinpoint the source of this encoding error. It seems to arise during configuration export/import, likely involving `btoa` and `atob`. Non-ASCII characters are the prime suspects, I'm thinking about how to handle them correctly to prevent the `InvalidCharacterError`. I’m exploring ways to encode and decode these characters effectively.\n\n\n**Fixing UTF-8 Encoding**\n\nI've realized that the core issue stems from `btoa` and its ASCII limitation when dealing with Chinese characters, like \"续命咖啡\". To fix this, I'll encode JSON strings as UTF-8 before using `btoa` and decode them similarly when importing. I'm updating `exportFullConfig` and `importFullConfig` and the `storageService.ts`, focusing on using `TextEncoder` and `TextDecoder` for the encoding/decoding, or potentially a simpler trick I came across.\n\n\n**Refining the Encoding Strategy**\n\nI'm now zeroing in on a solid solution. The previous `encodeURIComponent` trick looks very appealing. I considered the `TextEncoder` approach but decided against it, sticking with the more reliable `encodeURIComponent`/`decodeURIComponent` method. This simple approach feels less error-prone and aligns well with our needs. I've decided to move forward with updating the `exportFullConfig` and `importFullConfig` functions to use it, to prevent the `InvalidCharacterError`.\n\n\n**Implementing UTF-8 Encoding**\n\nI'm now fully committed to integrating `encodeURIComponent` and `decodeURIComponent` directly into `storageService.ts`. This involves updating methods to ensure proper handling of UTF-8 characters during configuration export and import. The goal is now precise and streamlined: ensure that Chinese characters, and others, do not break the configuration.\n\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768392012,
+      "nanos": 974000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768392026,
+      "nanos": 83000000
+    }
+  },
+  {
+    "id": 16,
+    "author": "model",
+    "payload": {
+      "type": "generationTable",
+      "entries": [
+        {
+          "path": "services/storageService.ts",
+          "generationType": 1,
+          "isDone": true,
+          "description": "Fix InvalidCharacterError by using UTF-8 safe base64 encoding and decoding for configuration export/import.",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "import { Contact, QuickActionConfig, UserProfile } from \"../types\";\nimport { AVATAR_COLORS, DEFAULT_QUICK_ACTIONS } from \"../constants\";\n\nconst STORAGE_KEY = 'buzzsync_contacts';\nconst MY_PROFILE_KEY = 'buzzsync_my_profile';\nconst ACTIONS_KEY = 'buzzsync_quick_actions';\n\nexport const getContacts = (): Contact[] => {\n  const data = localStorage.getItem(STORAGE_KEY);\n  return data ? JSON.parse(data) : [];\n};\n\nexport const saveContact = (name: string, barkUrlOrKey: string): Contact => {\n  const contacts = getContacts();\n  let key = barkUrlOrKey.trim();\n  if (key.includes('api.day.app/')) {\n    const parts = key.split('api.day.app/');\n    if (parts[1]) key = parts[1].split('/')[0];\n  }\n\n  const newContact: Contact = {\n    id: crypto.randomUUID(),\n    name: name.trim(),\n    barkKey: key,\n    avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],\n  };\n\n  const updated = [...contacts, newContact];\n  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));\n  return newContact;\n};\n\nexport const deleteContact = (id: string) => {\n  const contacts = getContacts();\n  const updated = contacts.filter(c => c.id !== id);\n  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));\n  return updated;\n};\n\nexport const getMyProfile = (): UserProfile => {\n  const data = localStorage.getItem(MY_PROFILE_KEY);\n  return data ? JSON.parse(data) : { name: '', barkKey: '' };\n};\n\nexport const saveMyProfile = (profile: UserProfile) => {\n  localStorage.setItem(MY_PROFILE_KEY, JSON.stringify(profile));\n};\n\nexport const getQuickActions = (): QuickActionConfig[] => {\n  const data = localStorage.getItem(ACTIONS_KEY);\n  return data ? JSON.parse(data) : DEFAULT_QUICK_ACTIONS;\n};\n\nexport const saveQuickActions = (actions: QuickActionConfig[]) => {\n  localStorage.setItem(ACTIONS_KEY, JSON.stringify(actions));\n};\n\n/**\n * 方案 2: 导出完整配置为 JSON 字符串 (UTF-8 安全)\n */\nexport const exportFullConfig = (): string => {\n  const config = {\n    contacts: getContacts(),\n    profile: getMyProfile(),\n    actions: getQuickActions(),\n    version: '1.0',\n    timestamp: Date.now()\n  };\n  const jsonStr = JSON.stringify(config);\n  // Use a UTF-8 safe way to encode to Base64\n  return btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => {\n    return String.fromCharCode(parseInt(p1, 16));\n  }));\n};\n\n/**\n * 方案 2: 从 JSON 字符串恢复配置 (UTF-8 安全)\n */\nexport const importFullConfig = (base64Config: string): boolean => {\n  try {\n    // Use a UTF-8 safe way to decode from Base64\n    const jsonStr = decodeURIComponent(atob(base64Config).split('').map((c) => {\n      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);\n    }).join(''));\n    \n    const config = JSON.parse(jsonStr);\n    \n    if (config.contacts) localStorage.setItem(STORAGE_KEY, JSON.stringify(config.contacts));\n    if (config.profile) localStorage.setItem(MY_PROFILE_KEY, JSON.stringify(config.profile));\n    if (config.actions) localStorage.setItem(ACTIONS_KEY, JSON.stringify(config.actions));\n    \n    return true;\n  } catch (e) {\n    console.error(\"Import failed:\", e);\n    return false;\n  }\n};"
+            }
+          ]
+        }
+      ]
+    },
+    "createdTimestamp": {
+      "seconds": 1768392026,
+      "nanos": 83000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768392030,
+      "nanos": 251000000
+    }
+  },
+  {
+    "id": 17,
+    "author": "user",
+    "payload": {
+      "type": "text",
+      "text": "帮我生成新功能的使用说明",
+      "files": [],
+      "fileUploads": [],
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768392432,
+      "nanos": 167000000
+    }
+  },
+  {
+    "id": 18,
+    "author": "model",
+    "payload": {
+      "type": "thinking",
+      "text": "**Developing Feature Instructions**\n\nI'm currently focused on generating user instructions for the new features: Backup & Restore, and Customizable Messages. I'm also considering BuzzSync, an iOS-styled notification group app using Bark, as a potential project.\n\n\n**Refining Feature Instructions**\n\nI've been refining the instructions for the \"Customizable Messages\" and \"Backup & Restore\" features. I'm structuring them with clear headings and aiming for an iOS-friendly tone. Specifically, I'm focusing on \"Where,\" \"How,\" and \"Benefit\" for each feature. I'm highlighting the multi-line capability of the customizable messages and the Base64 code implementation for backup and restore. Contact Selection is also to be included.\n\n\n**Drafting the User Guide**\n\nI'm now drafting the actual content for the \"User Guide,\" considering the user's need for a comprehensive \"Help\" section. I've structured it into an introduction, sections for message customization, backup/restore, and a FAQ, and I'll include \"Pro Tips\" for Bark setup. I'm focusing on creating a visually appealing markdown guide. I need to include a note about the Base64 encoding fix, and mention quick actions are random.\n\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768392432,
+      "nanos": 167000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768392451,
+      "nanos": 104000000
+    }
+  },
+  {
+    "id": 19,
+    "author": "model",
+    "payload": {
+      "type": "text",
+      "text": "针对 **BuzzSync** 最近更新的两个核心功能（**话术自定义** 与 **配置备份/恢复**），我为你准备了一份通俗易懂的使用说明。你可以将其放入 App 的“关于”页面，或者作为发给群组成员的入门指南。\n\n---\n\n# 🚀 BuzzSync 功能使用指南\n\n欢迎使用 BuzzSync！为了让你和好友的互动更高效、更有趣，我们上线了全新的自定义与备份功能。\n\n### 1. ✍️ 自定义你的“一键话术”\n现在，App 底部的 8 个快捷按钮不再是固定的了。你可以根据群组的习惯（比如改成“开黑”、“开会”或“剧本杀”）进行完全自定义。\n\n*   **如何操作**：\n    1.  点击首页右上角的 **齿轮图标 (设置)**。\n    2.  找到 **“自定义按钮与话术”** 区域。\n    3.  点击按钮旁边的 **“编辑话术”** 蓝色文字。\n    4.  在弹出的文本框中，输入你想发送的消息。**每行代表一句独立的话**，发送时 App 会从这些话中**随机抽取**一句发送（增加新鲜感！）。\n    5.  你还可以点击下方的**彩色圆点**，为按钮更换你喜欢的颜色。\n    6.  完成后点击底部的 **“完成并保存”**。\n\n---\n\n### 2. 💾 数据备份与“瞬间移动”\n由于我们的 App 数据保存在浏览器本地（LocalStorage），为了防止清理缓存导致数据丢失，或者方便你在新手机上同步，我们提供了“代码备份”功能。\n\n*   **如何备份（导出）**：\n    1.  进入 **设置** -> **数据备份与恢复**。\n    2.  点击 **“生成并复制备份代码”**。\n    3.  此时你的剪贴板已复制了一段长代码，请将其粘贴到 **手机备忘录** 或 **微信收藏** 中妥善保存。\n\n*   **如何恢复（导入）**：\n    1.  如果你更换了手机或清理了数据，打开 App 进入 **设置**。\n    2.  将你之前保存的那段代码粘贴到底部的**文本框**中。\n    3.  点击 **“导入并恢复配置”**。\n    4.  App 会自动重新加载，你的联系人、自定义按钮和所有话术将瞬间找回！\n\n---\n\n### 3. 💡 进阶使用小贴士\n*   **关于 Bark Key**：请确保每位成员都安装了 **Bark** App。在 Bark 中复制那串类似 `https://api.day.app/XXXXX` 的链接，直接粘贴进 BuzzSync 即可，系统会自动提取有效的 Key。\n*   **多选发送**：在首页点击联系人头像可切换选中状态。你可以一次选中所有人发送“紧急呼叫”，也可以只选中“饭搭子”发送“干饭”提醒。\n*   **一键全选**：点击“接收列表”旁边的 **“全选/取消”**，可以快速切换发送对象。\n\n---\n\n### 常见问题\n*   **Q: 为什么我修改了话术，对方收到的还是旧的？**\n    *   A: 修改话术是保存在你本地的，对方收到的内容完全取决于你点击按钮时发送了什么。\n*   **Q: 备份代码里包含我的私钥吗？**\n    *   A: 包含。备份代码包含你的昵称、Bark Key、联系人列表和话术。请不要将备份代码发给不信任的人。\n\n---\n\n**祝你 Buzz 愉快！🐝**",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768392451,
+      "nanos": 105000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768392451,
+      "nanos": 163000000
+    }
+  },
+  {
+    "id": 20,
+    "author": "user",
+    "payload": {
+      "type": "text",
+      "text": "还有编辑按钮话术的说明也帮我加进去吧，再给我一份完整的",
+      "files": [],
+      "fileUploads": [],
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768392730,
+      "nanos": 956000000
+    }
+  },
+  {
+    "id": 21,
+    "author": "model",
+    "payload": {
+      "type": "thinking",
+      "text": "**Composing Instructions for BuzzSync**\n\nI'm focused on finalizing the user manual for BuzzSync, specifically the instruction set. I've covered the quick action buttons - customization of labels, colors, random messages - and also how to perform a full configuration backup/restore (using Base64). My current effort is focused on crafting clear, concise instructions.\n\n\n**Clarifying Message Editing Flow**\n\nI've been working on refining the \"Edit Messages\" section of the user guide, ensuring it's clear and user-friendly after the Base64 fix. This includes a step-by-step process with descriptions and an explanation of the random message selection. I'm also including concise instructions for label editing and color changes, as well as a recap on backup/restore, now UTF-8 safe. The overall goal is a full user guide in the style of iOS with emojis.\n\n\n**Prioritizing Features & Finalizing**\n\nI'm focused on finishing the section on customizing buttons and random messages, as requested. The \"one message per line\" rule is emphasized for random rotation. I've confirmed that label and message editing are covered. I've also incorporated the one-tap alert feature, and of course, data backup and sync. I'm making sure to highlight the reliability updates of the backup. This section is nearly complete, moving closer to the final release.\n\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768392730,
+      "nanos": 956000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768392743,
+      "nanos": 788000000
+    }
+  },
+  {
+    "id": 22,
+    "author": "model",
+    "payload": {
+      "type": "text",
+      "text": "这是一份为您精心整理的 **BuzzSync 完整使用说明**。它涵盖了从基础设置到进阶自定义的所有核心功能，您可以将其保存为文档或直接分享给您的群组成员。\n\n---\n\n# 🐝 BuzzSync 完整使用指南\n\nBuzzSync 是一款专为 iOS 设计的群组快速提醒工具。通过它，你可以一键给所有好友发送预设或自定义的通知。\n\n## 1. 🏁 入门指南：设置您的接收端\nBuzzSync 依赖 **Bark**（一款开源的 iOS 推送工具）来接收通知。\n\n1.  **安装 Bark**：在 App Store 搜索并下载 “Bark”。\n2.  **获取 Key**：打开 Bark App，你会看到一个类似 `https://api.day.app/XXXXXXXX` 的链接。其中 `XXXXXXXX` 就是你的 **Bark Key**。\n3.  **配置个人信息**：\n    *   在 BuzzSync 点击右上角 **齿轮图标 (设置)**。\n    *   填写你的 **昵称** 和 **Bark Key**。\n    *   点击“完成并保存”。（*这样别人在收到你的消息时，才知道是谁发的*）。\n\n---\n\n## 2. 👥 管理联系人\n在首页，你可以建立自己的“通知群组”。\n\n*   **添加好友**：点击列表中的 **“➕ 添加”** 按钮，输入好友的昵称和他们的 Bark Key。\n*   **选中/取消**：点击好友头像即可切换。**亮起**代表选中，**置灰**代表不发送。\n*   **批量操作**：点击“接收列表”右侧的 **“全选/取消”** 快速切换发送对象。\n*   **删除好友**：点击页面上方的 **“编辑”** 进入编辑模式，点击头像左上角的 **“—”** 号即可删除。\n\n---\n\n## 3. 🎨 自定义按钮与“随机话术”（核心功能）\n你可以完全修改底部 8 个快捷按钮的功能，让它们更符合你们群组的聊天黑话。\n\n*   **修改按钮名称**：在 **设置** 页面，点击按钮图标旁的文字，直接输入新的名字（如将“续命咖啡”改为“开黑”）。\n*   **编辑随机话术**：\n    1.  在设置页点击对应的 **“编辑话术”**。\n    2.  在展开的文本框中输入你想说的话。\n    3.  **重要规则**：**每行输入一句**。\n    4.  **效果**：当你点击该按钮时，系统会从你设置的多行话术中**随机抽取一句**发送，避免内容重复枯燥。\n*   **更换颜色**：点击按钮下方的彩色圆点，为不同类型的任务设置专属配色。\n\n---\n\n## 4. ⚡️ 一键呼叫\n*   **普通呼叫**：点击底部的 8 个自定义按钮，系统会立即给选中的人发送随机话术。\n*   **紧急呼叫**：点击最下方巨大的 **“一键提醒”** 蓝色按钮，将发送最高优先级的“紧急呼叫! ⚡️”。\n\n---\n\n## 5. 💾 数据备份与恢复\n由于数据保存在浏览器本地，我们建议您定期备份，或利用此功能在不同设备间同步。\n\n*   **导出备份**：\n    1.  进入 **设置** -> **数据备份与恢复**。\n    2.  点击 **“生成并复制备份代码”**。\n    3.  系统会将你的联系人、自定义设置和所有话术打包成一段加密代码。请将其保存到微信收藏或备忘录中。\n*   **导入恢复**：\n    1.  在新设备上进入 **设置**。\n    2.  将备份代码粘贴到底部文本框。\n    3.  点击 **“导入并恢复配置”**，页面会自动刷新并还原所有数据。\n\n---\n\n## 💡 使用小贴士\n*   **省电与常驻**：为了获得最佳体验，建议在 Safari 浏览器中打开，并点击分享按钮选择 **“添加到主屏幕”**。这样 BuzzSync 会像原生 App 一样全屏运行。\n*   **隐私说明**：您的所有联系人和 Key 都存储在您自己的手机本地，BuzzSync 不会上传您的私密数据到任何中心化服务器（除了发送给 Bark 官方服务器进行消息推送）。\n\n---\n\n**现在，去邀请你的好友加入 BuzzSync，开启高效（或者魔性）的一键呼叫生活吧！**",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768392743,
+      "nanos": 788000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768392743,
+      "nanos": 845000000
+    }
+  },
+  {
+    "id": 23,
+    "author": "user",
+    "payload": {
+      "type": "text",
+      "text": "现在编辑话术的输入栏里面无法换行，按换行没反应",
+      "files": [],
+      "fileUploads": [],
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768623839,
+      "nanos": 587000000
+    }
+  },
+  {
+    "id": 24,
+    "author": "model",
+    "payload": {
+      "type": "thinking",
+      "text": "**Troubleshooting the Textarea**\n\nI'm currently focused on the `SettingsModal.tsx` component and the \"Quick Action\" message editor. My main concern is the inability to insert newlines within the `textarea`. This blocks the user from adhering to the \"one message per line\" guideline. I'm exploring the component structure to understand why the Enter key isn't working as expected within that specific `textarea`.\n\n\n**Analyzing the DOM Structure**\n\nOkay, I've got a better handle on the DOM layout now. The `textarea` sits within a nested `div` structure, including a `section` and another `div` with `max-h-[90vh]` and `overflow-y-auto`. I'm also considering the `flex items-end sm:items-center` wrapper around the `SettingsModal`. And I discovered a global style in `index.html` that sets `position: fixed` and `overflow: hidden` on the `body`. However, there isn't an explicit `onKeyDown` handler that I can see.\n\n\n**Examining Key Intercepts**\n\nI'm now zeroing in on potential key intercepts. I'm taking another look at the `index.html` global styles, specifically `overflow: hidden` and `position: fixed` on the `body`. I'm now certain there is not an `onKeyDown` handler. Also, I think there is `resize-none` styling, as well as a focus on how iOS handles `textarea` elements, particularly within flex or absolute layouts. I'm exploring the `updateActionMessages` function further.\n\n\n**Fixing the Newline Filter**\n\nI've pinpointed the newline issue in the `updateActionMessages` function. The `filter` is aggressively trimming empty lines as the user types, causing newlines to vanish immediately. This means that empty strings are being stripped out during editing. The `split('\\n')` creates an empty string at the end. I need to preserve the raw text or adjust the splitting logic to maintain newlines during the editing process. I am now thinking I should store the raw text in a local state.\n\n\n**Refining the State Management**\n\nI've realized a better approach is to only filter empty messages upon saving, not during typing. I can now allow empty strings in the `messages` array while editing, cleaning them up on save. I'll utilize a local state for the `textarea` value for free typing and sync it with the `actions` state. Also, I'll add an `onKeyDown` to ensure the Enter key isn't being suppressed, despite the filter being the main issue. My goal is to modify `updateActionMessages` to avoid filtering empty lines. I think I'll just remove the filter from the `onChange` handler and clean it up in `handleSave`. Specifically, I will update `updateActionMessages` to use `text.split('\\n')`. Finally, I will update `handleSave` to clean the messages array. I will use `.filter(m => m.trim() !== '')` when saving. I'm going back to the `SettingsModal` logic to review.\n\n\n**Implementing the Fix**\n\nI've confirmed that removing the filter in `updateActionMessages` and cleaning up on save addresses the newline issue.  Specifically, `\"Hello\\n\"` now becomes `[\"Hello\", \"\"]`, which correctly renders.  I'm updating both `updateActionMessages` and `handleSave` in `SettingsModal.tsx` now. Just in case, I'll add an `onKeyDown` to prevent parent components from interfering. The code fix is the priority now.\n\n\n**Refactoring the Message Logic**\n\nI've just revisited the code within `SettingsModal.tsx` and realized a more elegant approach. Instead of complex filtering, I can now use `action.messages.join('\\n')` to ensure messages are displayed and stored correctly with newlines. I've updated my perspective and think this might be a cleaner solution than the filtering. I am looking at how to include this in the quick actions XML.\n\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768623839,
+      "nanos": 587000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768623860,
+      "nanos": 238000000
+    }
+  },
+  {
+    "id": 25,
+    "author": "model",
+    "payload": {
+      "type": "text",
+      "text": "这个问题是由于在输入过程中，代码实时过滤掉了空白行导致的。当你按下换行键时，产生了一个空行，但过滤逻辑瞬间将其删除了，所以看起来像没反应。\n\n我已经修复了这个问题：现在输入时允许换行和空格，只有在最终点击“完成并保存”时，才会自动清理掉多余的空白行。\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1768623860,
+      "nanos": 238000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768623860,
+      "nanos": 238000000
+    }
+  },
+  {
+    "id": 26,
+    "author": "model",
+    "payload": {
+      "type": "generationTable",
+      "entries": [
+        {
+          "path": "components/SettingsModal.tsx",
+          "generationType": 1,
+          "isDone": true,
+          "description": "修复话术编辑无法换行的问题：移除输入时的实时过滤，改为在保存时统一清理空行。",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "import React, { useState, useEffect } from 'react';\nimport { Button } from './Button';\nimport { Input } from './Input';\nimport { X, ChevronRight, Palette, Copy, Download, Upload, RefreshCw, CheckCircle2, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';\nimport { \n  getMyProfile, \n  saveMyProfile, \n  getQuickActions, \n  saveQuickActions, \n  exportFullConfig, \n  importFullConfig \n} from '../services/storageService';\nimport { ACTION_LIGHT_COLORS } from '../constants';\nimport { QuickActionConfig } from '../types';\n\ninterface Props {\n  isOpen: boolean;\n  onClose: () => void;\n  onSave: () => void;\n}\n\nexport const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {\n  const [name, setName] = useState('');\n  const [barkKey, setBarkKey] = useState('');\n  const [actions, setActions] = useState<QuickActionConfig[]>([]);\n  const [importText, setImportText] = useState('');\n  const [copied, setCopied] = useState(false);\n  const [importError, setImportError] = useState(false);\n  const [importSuccess, setImportSuccess] = useState(false);\n  const [expandedActionId, setExpandedActionId] = useState<string | null>(null);\n\n  useEffect(() => {\n    if (isOpen) {\n      const profile = getMyProfile();\n      setName(profile.name);\n      setBarkKey(profile.barkKey);\n      setActions(getQuickActions());\n      setImportError(false);\n      setImportSuccess(false);\n    }\n  }, [isOpen]);\n\n  const handleSave = () => {\n    let cleanKey = barkKey.trim();\n    if (cleanKey.includes('api.day.app/')) {\n       cleanKey = cleanKey.split('api.day.app/')[1].split('/')[0];\n    }\n    \n    // 保存前清理话术中的空白行\n    const cleanedActions = actions.map(action => ({\n      ...action,\n      messages: action.messages.map(m => m.trim()).filter(m => m !== '')\n    }));\n\n    saveMyProfile({ name, barkKey: cleanKey });\n    saveQuickActions(cleanedActions);\n    onClose();\n  };\n\n  const handleCopyConfig = () => {\n    const config = exportFullConfig();\n    navigator.clipboard.writeText(config);\n    setCopied(true);\n    setTimeout(() => setCopied(false), 2000);\n  };\n\n  const handleImportConfig = () => {\n    if (!importText.trim()) return;\n    const success = importFullConfig(importText.trim());\n    if (success) {\n      setImportSuccess(true);\n      setImportError(false);\n      setTimeout(() => {\n        window.location.reload(); // 刷新页面以加载新配置\n      }, 1000);\n    } else {\n      setImportError(true);\n      setImportSuccess(false);\n    }\n  };\n\n  const updateActionColor = (id: string, colorClass: string) => {\n    setActions(prev => prev.map(a => a.id === id ? { ...a, colorClass } : a));\n  };\n\n  const updateActionLabel = (id: string, label: string) => {\n    setActions(prev => prev.map(a => a.id === id ? { ...a, label } : a));\n  };\n\n  const updateActionMessages = (id: string, text: string) => {\n    // 允许输入过程中的空行，不进行 filter 过滤\n    const messageList = text.split('\\n');\n    setActions(prev => prev.map(a => a.id === id ? { ...a, messages: messageList } : a));\n  };\n\n  if (!isOpen) return null;\n\n  return (\n    <div className=\"fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4\">\n      <div className=\"bg-[#F2F2F7] w-full max-w-md rounded-t-[32px] sm:rounded-[32px] p-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar\">\n        <div className=\"flex justify-between items-center mb-6 sticky top-0 bg-[#F2F2F7] z-10 py-2\">\n          <h3 className=\"text-2xl font-bold\">设置</h3>\n          <button onClick={onClose} className=\"bg-gray-200 p-2 rounded-full text-gray-500\">\n            <X className=\"w-6 h-6\" />\n          </button>\n        </div>\n\n        <div className=\"space-y-8 pb-10\">\n          <section className=\"space-y-4\">\n            <h4 className=\"text-xs font-bold text-gray-400 uppercase tracking-widest ml-1\">个人信息</h4>\n            <div className=\"bg-white rounded-2xl overflow-hidden shadow-sm\">\n              <div className=\"p-4 border-b border-gray-100\">\n                <Input label=\"我的昵称\" placeholder=\"输入名字\" value={name} onChange={(e) => setName(e.target.value)} />\n              </div>\n              <div className=\"p-4\">\n                <Input label=\"我的 Bark Key\" placeholder=\"粘贴 Key\" value={barkKey} onChange={(e) => setBarkKey(e.target.value)} className=\"font-mono text-sm\" />\n              </div>\n            </div>\n          </section>\n\n          <section className=\"space-y-4\">\n            <h4 className=\"text-xs font-bold text-gray-400 uppercase tracking-widest ml-1\">自定义按钮与话术</h4>\n            <div className=\"bg-white rounded-2xl overflow-hidden shadow-sm divide-y divide-gray-50\">\n              {actions.map((action) => (\n                <div key={action.id} className=\"p-4\">\n                  <div className=\"flex items-center justify-between mb-3\">\n                    <div className=\"flex items-center gap-3\">\n                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${action.colorClass}`}>\n                         <Palette className=\"w-5 h-5\" />\n                       </div>\n                       <input \n                         className=\"font-bold text-gray-800 outline-none w-32 border-b border-transparent focus:border-blue-500\"\n                         value={action.label}\n                         onChange={(e) => updateActionLabel(action.id, e.target.value)}\n                       />\n                    </div>\n                    <button \n                      onClick={() => setExpandedActionId(expandedActionId === action.id ? null : action.id)}\n                      className=\"text-blue-600 p-1 rounded-full hover:bg-blue-50 transition-colors\"\n                    >\n                      {expandedActionId === action.id ? <ChevronUp className=\"w-5 h-5\" /> : <div className=\"flex items-center gap-1 text-xs font-medium\"><MessageSquare className=\"w-4 h-4\" />编辑话术</div>}\n                    </button>\n                  </div>\n                  \n                  {expandedActionId === action.id && (\n                    <div className=\"mt-3 mb-4 animate-in slide-in-from-top-2 duration-200\">\n                      <label className=\"text-[11px] font-bold text-gray-400 uppercase mb-2 block ml-1\">随机话术 (每行一句)</label>\n                      <textarea \n                        className=\"w-full bg-gray-50 rounded-xl p-3 text-sm border-none ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 outline-none h-28 resize-none\"\n                        value={action.messages.join('\\n')}\n                        onChange={(e) => updateActionMessages(action.id, e.target.value)}\n                        placeholder=\"每行输入一句随机话术...\"\n                      />\n                    </div>\n                  )}\n\n                  <div className=\"flex gap-2 overflow-x-auto no-scrollbar py-1\">\n                    {ACTION_LIGHT_COLORS.map(color => (\n                      <button\n                        key={color.id}\n                        onClick={() => updateActionColor(action.id, color.class)}\n                        className={`w-8 h-8 rounded-full shrink-0 border-2 transition-all ${color.class.split(' ')[0]} ${action.colorClass.includes(color.class.split(' ')[0]) ? 'border-blue-500 scale-110 shadow-md' : 'border-transparent opacity-60'}`}\n                      />\n                    ))}\n                  </div>\n                </div>\n              ))}\n            </div>\n          </section>\n\n          <section className=\"space-y-4\">\n            <h4 className=\"text-xs font-bold text-gray-400 uppercase tracking-widest ml-1\">数据备份与恢复</h4>\n            <div className=\"bg-white rounded-2xl p-4 shadow-sm space-y-4\">\n              <div>\n                <p className=\"text-sm text-gray-500 mb-3\">\n                  可以将当前的联系人、自定义颜色及<b>随机话术</b>备份为一段代码。\n                </p>\n                <Button variant=\"secondary\" fullWidth onClick={handleCopyConfig} className=\"gap-2\">\n                  {copied ? <CheckCircle2 className=\"w-5 h-5 text-green-500\" /> : <Copy className=\"w-5 h-5\" />}\n                  {copied ? '已复制备份代码' : '生成并复制备份代码'}\n                </Button>\n              </div>\n              \n              <div className=\"pt-4 border-t border-gray-100\">\n                <textarea\n                  className={`w-full bg-gray-50 rounded-xl p-3 text-xs font-mono border-2 transition-colors outline-none h-24 ${importError ? 'border-red-300' : 'border-transparent focus:border-blue-500'}`}\n                  placeholder=\"在此粘贴备份代码以进行恢复...\"\n                  value={importText}\n                  onChange={(e) => setImportText(e.target.value)}\n                />\n                {importError && <p className=\"text-xs text-red-500 mt-1 ml-1\">代码无效，请检查是否完整粘贴</p>}\n                {importSuccess && <p className=\"text-xs text-green-500 mt-1 ml-1 flex items-center gap-1\"><RefreshCw className=\"w-3 h-3 animate-spin\" /> 恢复成功，正在刷新页面...</p>}\n                <Button \n                  variant=\"primary\" \n                  fullWidth \n                  onClick={handleImportConfig} \n                  disabled={!importText.trim() || importSuccess}\n                  className=\"mt-3 bg-gray-800 hover:bg-black\"\n                >\n                  <Upload className=\"w-5 h-5\" />\n                  导入并恢复配置\n                </Button>\n              </div>\n            </div>\n          </section>\n\n          <Button fullWidth onClick={handleSave} className=\"h-14\">完成并保存</Button>\n        </div>\n      </div>\n    </div>\n  );\n};"
+            }
+          ]
+        }
+      ]
+    },
+    "createdTimestamp": {
+      "seconds": 1768623860,
+      "nanos": 297000000
+    },
+    "doneTimestamp": {
+      "seconds": 1768623873,
+      "nanos": 44000000
+    }
+  }
+]
